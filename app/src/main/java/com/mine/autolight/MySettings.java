@@ -16,15 +16,15 @@ public class MySettings {
 
 	public void load() {
 		sharedPref = context.getSharedPreferences("mine.autolight", Context.MODE_PRIVATE | Context.MODE_MULTI_PROCESS);
-		l1 = sharedPref.getInt("l1", 20);
-		l2 = sharedPref.getInt("l2", 200);
-		l3 = sharedPref.getInt("l3", 2000);
-		l4 = sharedPref.getInt("l4", 20000);
-		b1 = sharedPref.getInt("b1", 31);
-		b2 = sharedPref.getInt("b2", 63);
-		b3 = sharedPref.getInt("b3", 127);
-		b4 = sharedPref.getInt("b4", 255);
-		mode = sharedPref.getInt("mode", Constants.WORK_MODE_ALWAYS);
+		l1 = sharedPref.getInt("l1", 10);
+		l2 = sharedPref.getInt("l2", 100);
+		l3 = sharedPref.getInt("l3", 1000);
+		l4 = sharedPref.getInt("l4", 10000);
+		b1 = sharedPref.getInt("b1", 1);
+		b2 = sharedPref.getInt("b2", 30);
+		b3 = sharedPref.getInt("b3", 60);
+		b4 = sharedPref.getInt("b4", 90);
+		mode = sharedPref.getInt("mode", Constants.WORK_MODE_LANDSCAPE);
 	}
 
 	public void save() {
