@@ -12,7 +12,7 @@ The app utilizes a 4-point linear interpolation model. You define four distinct 
 
 The main intended working mode is “On screen unlock/rotate” where the app captures ambient light data only during specific triggers (like unlocking or rotating). This sets your brightness once, preventing the “flickering” or “hunting” common with standard auto-brightness.
 
-Auto Light application is using Android Notifications. However, actually there are no any notifications that applications need to display. For this reason you may disable Notifications manually in Android Settings.
+The Auto Light app utilizes Android’s notification system to ensure stable background performance. However, since the app does not send active alerts or messages, you may choose to disable notifications in your Android system settings without affecting core functionality.
 
 Permissions & Transparency
 
