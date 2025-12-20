@@ -1,55 +1,55 @@
 package com.mine.autolight;
 
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Intent;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
-import android.hardware.SensorManager;
-import android.os.IBinder;
-import android.provider.Settings;
+import android.os.Build;
+import androidx.core.app.NotificationCompat; // If using androidx, or use native Notification.Builder
 
-public class LightService extends Service implements SensorEventListener {
+public class LightService extends Service {
 
-    private SensorManager sensorManager;
-    private static final float ALPHA = 0.2f; 
-    private float mSmoothedLux = -1.0f;
-    private int mLastAppliedBrightness = -1;
+    private static final String CHANNEL_ID = "AutoLightServiceChannel";
 
     @Override
     public void onCreate() {
         super.onCreate();
-        sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-        Sensor lightSensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
-        if (lightSensor != null) {
-            sensorManager.registerListener(this, lightSensor, SensorManager.SENSOR_DELAY_NORMAL);
+        
+        // 1. Create the Notification Channel (Required for Android 8.0+)
+        createNotificationChannel();
+
+        // 2. Build the notification
+        // This notification stays in the tray while Auto-Light is active
+        Notification notification = null;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            notification = new Notification.Builder(this, CHANNEL_ID)
+                .setContentTitle("Auto-Light Active")
+                .setContentText("Monitoring ambient light to optimize brightness.")
+                .setSmallIcon(R.mipmap.ic_launcher) // Use your app icon
+                .build();
+        }
+
+        // 3. Start as Foreground
+        // ID must be a non-zero integer
+        startForeground(1, notification);
+
+        // ... existing sensor initialization code ...
+    }
+
+    private void createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel serviceChannel = new NotificationChannel(
+                    CHANNEL_ID,
+                    "Auto-Light Background Service",
+                    NotificationManager.IMPORTANCE_LOW // Low importance = no sound/interruption
+            );
+            NotificationManager manager = getSystemService(NotificationManager.class);
+            if (manager != null) {
+                manager.createNotificationChannel(serviceChannel);
+            }
         }
     }
-
-    @Override
-    public void onSensorChanged(SensorEvent event) {
-        float currentLux = event.values[0];
-        if (mSmoothedLux == -1.0f) mSmoothedLux = currentLux;
-        else mSmoothedLux = (mSmoothedLux * (1.0f - ALPHA)) + (currentLux * ALPHA);
-
-        int targetBrightness = BrightnessAlgorithm.calculateBrightness(mSmoothedLux);
-
-        // Only update if change is > 3 to save battery
-        if (Math.abs(targetBrightness - mLastAppliedBrightness) > 3) {
-            try {
-                Settings.System.putInt(getContentResolver(), Settings.System.SCREEN_BRIGHTNESS, targetBrightness);
-                mLastAppliedBrightness = targetBrightness;
-            } catch (Exception ignored) {}
-        }
-    }
-
-    @Override
-    public void onDestroy() {
-        sensorManager.unregisterListener(this);
-        super.onDestroy();
-    }
-
-    @Override public int onStartCommand(Intent intent, int flags, int startId) { return START_STICKY; }
-    @Override public IBinder onBind(Intent intent) { return null; }
-    @Override public void onAccuracyChanged(Sensor sensor, int accuracy) {}
+    
+    // ... rest of your onSensorChanged logic ...
 }
