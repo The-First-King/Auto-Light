@@ -8,27 +8,19 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.IBinder;
 import android.provider.Settings;
-import android.util.Log;
 
 public class LightService extends Service implements SensorEventListener {
 
     private SensorManager sensorManager;
-    private Sensor lightSensor;
-    
-    // Smoothing constants
-    private static final float ALPHA = 0.2f; // Smoothing factor
+    private static final float ALPHA = 0.2f; 
     private float mSmoothedLux = -1.0f;
-    
-    // Change threshold (prevents battery drain from tiny adjustments)
-    private static final int MIN_CHANGE_THRESHOLD = 5; 
     private int mLastAppliedBrightness = -1;
 
     @Override
     public void onCreate() {
         super.onCreate();
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-        lightSensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
-
+        Sensor lightSensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
         if (lightSensor != null) {
             sensorManager.registerListener(this, lightSensor, SensorManager.SENSOR_DELAY_NORMAL);
         }
@@ -36,53 +28,28 @@ public class LightService extends Service implements SensorEventListener {
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        if (event.sensor.getType() == Sensor.TYPE_LIGHT) {
-            float currentLux = event.values[0];
+        float currentLux = event.values[0];
+        if (mSmoothedLux == -1.0f) mSmoothedLux = currentLux;
+        else mSmoothedLux = (mSmoothedLux * (1.0f - ALPHA)) + (currentLux * ALPHA);
 
-            // 1. Apply Smoothing (Low-pass filter)
-            if (mSmoothedLux == -1.0f) {
-                mSmoothedLux = currentLux; // First reading
-            } else {
-                mSmoothedLux = (mSmoothedLux * (1.0f - ALPHA)) + (currentLux * ALPHA);
-            }
+        int targetBrightness = BrightnessAlgorithm.calculateBrightness(mSmoothedLux);
 
-            // 2. Calculate Brightness using our new Logarithmic Algorithm
-            int targetBrightness = BrightnessAlgorithm.calculateBrightness(mSmoothedLux);
-
-            // 3. Only update if the change is significant (Hysteresis)
-            if (Math.abs(targetBrightness - mLastAppliedBrightness) >= MIN_CHANGE_THRESHOLD) {
-                updateSystemBrightness(targetBrightness);
-            }
+        // Only update if change is > 3 to save battery
+        if (Math.abs(targetBrightness - mLastAppliedBrightness) > 3) {
+            try {
+                Settings.System.putInt(getContentResolver(), Settings.System.SCREEN_BRIGHTNESS, targetBrightness);
+                mLastAppliedBrightness = targetBrightness;
+            } catch (Exception ignored) {}
         }
-    }
-
-    private void updateSystemBrightness(int brightness) {
-        try {
-            Settings.System.putInt(getContentResolver(), 
-                    Settings.System.SCREEN_BRIGHTNESS, brightness);
-            mLastAppliedBrightness = brightness;
-            Log.d("AutoLight", "Brightness updated to: " + brightness + " for Lux: " + mSmoothedLux);
-        } catch (Exception e) {
-            Log.e("AutoLight", "Error writing settings. Check WRITE_SETTINGS permission.");
-        }
-    }
-
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        return START_STICKY;
     }
 
     @Override
     public void onDestroy() {
-        super.onDestroy();
         sensorManager.unregisterListener(this);
+        super.onDestroy();
     }
 
-    @Override
-    public IBinder onBind(Intent intent) {
-        return null;
-    }
-
-    @Override
-    public void onAccuracyChanged(Sensor sensor, int accuracy) {}
+    @Override public int onStartCommand(Intent intent, int flags, int startId) { return START_STICKY; }
+    @Override public IBinder onBind(Intent intent) { return null; }
+    @Override public void onAccuracyChanged(Sensor sensor, int accuracy) {}
 }
