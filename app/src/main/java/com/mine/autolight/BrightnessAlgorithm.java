@@ -5,25 +5,26 @@ import java.util.TreeMap;
 
 public class BrightnessAlgorithm {
 
-    /**
-     * Uses the user-defined points from MySettings but connects them
-     * with smooth transitions instead of harsh linear jumps.
-     */
     public static int calculateBrightness(float ambientLux) {
-        // 1. Get the points from your existing settings file
-        TreeMap<Float, Integer> points = new TreeMap<>(MySettings.getPoints());
+        // Use a TreeMap to sort your MySettings points by Lux value automatically
+        TreeMap<Float, Integer> sortedPoints = new TreeMap<>();
+        
+        // Convert your MySettings HashMap into our sorted TreeMap
+        for (Map.Entry<Integer, Integer> entry : MySettings.points.entrySet()) {
+            sortedPoints.put(entry.getKey().floatValue(), entry.getValue());
+        }
 
-        // Handle edge cases (lux lower than your lowest point or higher than highest)
-        if (ambientLux <= points.firstKey()) return points.firstEntry().getValue();
-        if (ambientLux >= points.lastKey()) return points.lastEntry().getValue();
+        if (sortedPoints.isEmpty()) return 125; // Safety default
 
-        // 2. Find the two points the current lux sits between (The "Segment")
-        Map.Entry<Float, Integer> lower = points.floorEntry(ambientLux);
-        Map.Entry<Float, Integer> upper = points.ceilingEntry(ambientLux);
+        // Logic for Lux lower than your first point
+        if (ambientLux <= sortedPoints.firstKey()) return sortedPoints.firstEntry().getValue();
+        // Logic for Lux higher than your last point
+        if (ambientLux >= sortedPoints.lastKey()) return sortedPoints.lastEntry().getValue();
 
-        if (lower == null || upper == null) return 125; // Default fallback
+        // Find the "Segment" (the point below and the point above current Lux)
+        Map.Entry<Float, Integer> lower = sortedPoints.floorEntry(ambientLux);
+        Map.Entry<Float, Integer> upper = sortedPoints.ceilingEntry(ambientLux);
 
-        // 3. Apply Segmented Logarithmic Interpolation
         return interpolateLogarithmically(
                 lower.getKey(), lower.getValue(), 
                 upper.getKey(), upper.getValue(), 
@@ -32,13 +33,9 @@ public class BrightnessAlgorithm {
     }
 
     private static int interpolateLogarithmically(float x1, int y1, float x2, int y2, float currentX) {
-        // If the lux values are the same to avoid division by zero
         if (x1 == x2) return y1;
 
-        // Formula: y = y1 + (y2 - y1) * [ log(currentX) - log(x1) ] / [ log(x2) - log(x1) ]
-        // This ensures that within your custom points, the transition follows 
-        // the logarithmic perception of the human eye.
-        
+        // Human eye perception formula (Logarithmic scale)
         double logX = Math.log(currentX);
         double logX1 = Math.log(x1);
         double logX2 = Math.log(x2);
