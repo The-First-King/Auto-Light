@@ -1,14 +1,14 @@
 package com.mine.autolight;
 
+import android.app.Activity; // Native Android Activity
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.widget.Toast;
-import androidx.appcompat.app.AppCompatActivity;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -19,13 +19,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void checkPermissions() {
-        // Special permission required to modify system brightness on Android 6.0+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (!Settings.System.canWrite(this)) {
                 Intent intent = new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS);
                 intent.setData(Uri.parse("package:" + getPackageName()));
                 startActivityForResult(intent, 1000);
-                Toast.makeText(this, "Please allow permission to modify settings", Toast.LENGTH_LONG).show();
             } else {
                 startAutoLightService();
             }
@@ -37,7 +35,6 @@ public class MainActivity extends AppCompatActivity {
     private void startAutoLightService() {
         Intent intent = new Intent(this, LightService.class);
         startService(intent);
-        Toast.makeText(this, "Auto-Light Service Started", Toast.LENGTH_SHORT).show();
     }
 
     @Override
