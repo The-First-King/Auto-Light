@@ -2,63 +2,37 @@ package com.mine.autolight;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import java.util.HashMap;
 
 public class MySettings {
-    private final Context context;
-    private SharedPreferences sharedPref;
-    
-    public int l1, l2, l3, l4, b1, b2, b3, b4;
-    public int mode;
-
-    // The algorithm reads this static map
-    public static HashMap<Integer, Integer> points = new HashMap<>();
-    public static int currentMode;
+    private final SharedPreferences prefs;
+    public int l1, l2, l3, l4, b1, b2, b3, b4, mode;
 
     public MySettings(Context context) {
-        this.context = context;
+        prefs = context.getSharedPreferences("autolight_prefs", Context.MODE_PRIVATE);
         load();
     }
 
     public void load() {
-        sharedPref = context.getSharedPreferences("mine.autolight", Context.MODE_PRIVATE);
+        l1 = prefs.getInt("l1", 10);
+        l2 = prefs.getInt("l2", 100);
+        l3 = prefs.getInt("l3", 500);
+        l4 = prefs.getInt("l4", 1000);
+        b1 = prefs.getInt("b1", 30);
+        b2 = prefs.getInt("b2", 80);
+        b3 = prefs.getInt("b3", 150);
+        b4 = prefs.getInt("b4", 255);
+        mode = prefs.getInt("mode", Constants.WORK_MODE_ALWAYS);
         
-        l1 = sharedPref.getInt("l1", 10);
-        l2 = sharedPref.getInt("l2", 100);
-        l3 = sharedPref.getInt("l3", 1000);
-        l4 = sharedPref.getInt("l4", 10000);
-        
-        b1 = sharedPref.getInt("b1", 20);
-        b2 = sharedPref.getInt("b2", 80);
-        b3 = sharedPref.getInt("b3", 160);
-        b4 = sharedPref.getInt("b4", 255);
-        
-        mode = sharedPref.getInt("mode", 0); 
-        currentMode = mode;
-
-        updateMap();
-    }
-
-    public void updateMap() {
-        points.clear();
-        points.put(l1, b1);
-        points.put(l2, b2);
-        points.put(l3, b3);
-        points.put(l4, b4);
+        // Sync the static map for the algorithm
+        BrightnessAlgorithm.setPoints(l1, b1, l2, b2, l3, b3, l4, b4);
     }
 
     public void save() {
-        SharedPreferences.Editor editor = sharedPref.edit();
-        editor.putInt("l1", l1);
-        editor.putInt("l2", l2);
-        editor.putInt("l3", l3);
-        editor.putInt("l4", l4);
-        editor.putInt("b1", b1);
-        editor.putInt("b2", b2);
-        editor.putInt("b3", b3);
-        editor.putInt("b4", b4);
-        editor.putInt("mode", mode);
-        editor.apply();
-        updateMap();
+        prefs.edit()
+            .putInt("l1", l1).putInt("l2", l2).putInt("l3", l3).putInt("l4", l4)
+            .putInt("b1", b1).putInt("b2", b2).putInt("b3", b3).putInt("b4", b4)
+            .putInt("mode", mode)
+            .apply();
+        BrightnessAlgorithm.setPoints(l1, b1, l2, b2, l3, b3, l4, b4);
     }
 }
