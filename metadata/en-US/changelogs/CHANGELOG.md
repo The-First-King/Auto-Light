@@ -1,5 +1,7 @@
 # CHANGELOG
 
+# Release 2.0
+Refactor brightness calculation with log interpolation: Switching from plain linear interpolation in lux space to a non-linear mapping that will feel much better to users because human perception of brightness is roughly logarithmic.
 
 # Release 1.1
 This represents the initial fork of the [Auto-Shine](https://github.com/Valent-in/Auto-Shine) project. It introduces a rebranded name and logo, alongside minor UI enhancements within the settings menu.
