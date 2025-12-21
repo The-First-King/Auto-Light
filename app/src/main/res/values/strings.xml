@@ -25,6 +25,4 @@
     <string name="starting_service">Starting service</string>
     <string name="m_landscape">Landscape only</string>
     <string name="config_updated">Config updated</string>
-    <string name="permission_phone_granted">Phone permission granted</string>
-    <string name="permission_phone_denied">Phone permission denied</string>
 </resources>
