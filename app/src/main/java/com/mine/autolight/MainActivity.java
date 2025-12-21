@@ -20,312 +20,277 @@ import android.widget.*;
 
 public class MainActivity extends Activity {
 
-    private static final int REQ_WRITE_SETTINGS = 100;
-    private static final int REQ_RUNTIME_PERMS = 123;
+	private Button btnStart;
+	private TextView tvState;
 
-    private Button btnStart;
-    private TextView tvState;
+	private EditText etSensor1, etSensor2, etSensor3, etSensor4;
+	private EditText etBrightness1, etBrightness2, etBrightness3, etBrightness4;
 
-    private EditText etSensor1, etSensor2, etSensor3, etSensor4;
-    private EditText etBrightness1, etBrightness2, etBrightness3, etBrightness4;
+	private PowerManager powerMan;
+	private MySettings sett;
 
-    private PowerManager powerMan;
-    private MySettings sett;
+	private boolean isExpanded = false;
+	private boolean isDialogShown = false;
 
-    private boolean isExpanded = false;
-    private boolean isDialogShown = false;
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_main);
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+		powerMan = (PowerManager) getSystemService(POWER_SERVICE);
+		sett = new MySettings(this);
 
-        powerMan = (PowerManager) getSystemService(POWER_SERVICE);
-        sett = new MySettings(this);
+		Button btnExpand = findViewById(R.id.btn_expand);
+		LinearLayout llHidden = findViewById(R.id.ll_hidden_settings);
+		llHidden.setVisibility(View.GONE);
+		btnExpand.setOnClickListener(arg0 -> {
+			if (isExpanded) {
+				llHidden.setVisibility(View.GONE);
+				btnExpand.setText(R.string.show_config);
+				isExpanded = false;
+			} else {
+				llHidden.setVisibility(View.VISIBLE);
+				btnExpand.setText(R.string.hide_config);
+				isExpanded = true;
+				refillCollapsibleSettings();
+				requestNotificationPermission();
+			}
+		});
 
-        Button btnExpand = findViewById(R.id.btn_expand);
-        LinearLayout llHidden = findViewById(R.id.ll_hidden_settings);
-        llHidden.setVisibility(View.GONE);
-        btnExpand.setOnClickListener(arg0 -> {
-            if (isExpanded) {
-                llHidden.setVisibility(View.GONE);
-                btnExpand.setText(R.string.show_config);
-                isExpanded = false;
-            } else {
-                llHidden.setVisibility(View.VISIBLE);
-                btnExpand.setText(R.string.hide_config);
-                isExpanded = true;
-                refillCollapsibleSettings();
-                requestNotificationPermission();
-            }
-        });
+		tvState = findViewById(R.id.tv_service_state);
+		btnStart = findViewById(R.id.btn_start_stop);
+		btnStart.setOnClickListener(arg0 -> {
+			if (isServiceRunning()) {
+				killService();
+				displayServiceStatus(0);
+			} else {
+				runService();
+				displayServiceStatus(-1);
+			}
+		});
 
-        tvState = findViewById(R.id.tv_service_state);
-        btnStart = findViewById(R.id.btn_start_stop);
-        btnStart.setOnClickListener(arg0 -> {
-            if (isServiceRunning()) {
-                killService();
-                displayServiceStatus(0);
-            } else {
-                runService();
-                displayServiceStatus(-1);
-            }
-        });
+		Button btnState = findViewById(R.id.btn_get_state);
+		btnState.setOnClickListener(arg0 -> {
+			if (isServiceRunning()) {
+				displayServiceStatus(1);
+			} else {
+				displayServiceStatus(0);
+			}
 
-        Button btnState = findViewById(R.id.btn_get_state);
-        btnState.setOnClickListener(arg0 -> {
-            displayServiceStatus(isServiceRunning() ? 1 : 0);
-            sendBroadcastToService(Constants.SERVICE_INTENT_PAYLOAD_PING);
-        });
+			sendBroadcastToService(Constants.SERVICE_INTENT_PAYLOAD_PING);
+		});
 
-        Button btnRequest = findViewById(R.id.btn_request);
-        btnRequest.setOnClickListener(arg0 -> {
-            if (!powerMan.isIgnoringBatteryOptimizations(getPackageName())) {
-                Intent intent = new Intent();
-                intent.setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
-                intent.setData(Uri.parse("package:" + getPackageName()));
-                startActivity(intent);
-            }
-        });
+		Button btnRequest = findViewById(R.id.btn_request);
+		btnRequest.setOnClickListener(arg0 -> {
+			if (!powerMan.isIgnoringBatteryOptimizations(getPackageName())) {
+				Intent intent = new Intent();
+				intent.setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
+				intent.setData(Uri.parse("package:" + getPackageName()));
+				startActivity(intent);
+			}
+		});
 
-        etSensor1 = findViewById(R.id.et_sensor_value_1);
-        etSensor2 = findViewById(R.id.et_sensor_value_2);
-        etSensor3 = findViewById(R.id.et_sensor_value_3);
-        etSensor4 = findViewById(R.id.et_sensor_value_4);
+		etSensor1 = findViewById(R.id.et_sensor_value_1);
+		etSensor2 = findViewById(R.id.et_sensor_value_2);
+		etSensor3 = findViewById(R.id.et_sensor_value_3);
+		etSensor4 = findViewById(R.id.et_sensor_value_4);
 
-        etBrightness1 = findViewById(R.id.et_brightness_value_1);
-        etBrightness2 = findViewById(R.id.et_brightness_value_2);
-        etBrightness3 = findViewById(R.id.et_brightness_value_3);
-        etBrightness4 = findViewById(R.id.et_brightness_value_4);
+		etBrightness1 = findViewById(R.id.et_brightness_value_1);
+		etBrightness2 = findViewById(R.id.et_brightness_value_2);
+		etBrightness3 = findViewById(R.id.et_brightness_value_3);
+		etBrightness4 = findViewById(R.id.et_brightness_value_4);
 
-        refillCollapsibleSettings();
+		refillCollapsibleSettings();
 
-        Button btnSave = findViewById(R.id.btn_save_settings);
-        btnSave.setOnClickListener(arg0 -> {
-            sett.l1 = Integer.parseInt(etSensor1.getText().toString());
-            sett.l2 = Integer.parseInt(etSensor2.getText().toString());
-            sett.l3 = Integer.parseInt(etSensor3.getText().toString());
-            sett.l4 = Integer.parseInt(etSensor4.getText().toString());
-            sett.b1 = Integer.parseInt(etBrightness1.getText().toString());
-            sett.b2 = Integer.parseInt(etBrightness2.getText().toString());
-            sett.b3 = Integer.parseInt(etBrightness3.getText().toString());
-            sett.b4 = Integer.parseInt(etBrightness4.getText().toString());
+		Button btnSave = findViewById(R.id.btn_save_settings);
+		btnSave.setOnClickListener(arg0 -> {
+			sett.l1 = Integer.parseInt(etSensor1.getText().toString());
+			sett.l2 = Integer.parseInt(etSensor2.getText().toString());
+			sett.l3 = Integer.parseInt(etSensor3.getText().toString());
+			sett.l4 = Integer.parseInt(etSensor4.getText().toString());
+			sett.b1 = Integer.parseInt(etBrightness1.getText().toString());
+			sett.b2 = Integer.parseInt(etBrightness2.getText().toString());
+			sett.b3 = Integer.parseInt(etBrightness3.getText().toString());
+			sett.b4 = Integer.parseInt(etBrightness4.getText().toString());
 
-            sett.save();
-            sendBroadcastToService(Constants.SERVICE_INTENT_PAYLOAD_SET);
-        });
+			sett.save();
+			sendBroadcastToService(Constants.SERVICE_INTENT_PAYLOAD_SET);
+		});
 
-        RadioButton rbWAlways = findViewById(R.id.rb_work_always);
-        RadioButton rbWPortrait = findViewById(R.id.rb_work_portrait);
-        RadioButton rbWLandscape = findViewById(R.id.rb_work_landscape);
-        RadioButton rbWUnlock = findViewById(R.id.rb_work_unlock);
+		RadioButton rbWAlways = findViewById(R.id.rb_work_always);
+		RadioButton rbWPortrait = findViewById(R.id.rb_work_portrait);
+		RadioButton rbWLandscape = findViewById(R.id.rb_work_landscape);
+		RadioButton rbWUnlock = findViewById(R.id.rb_work_unlock);
 
-        if (sett.mode == Constants.WORK_MODE_ALWAYS) rbWAlways.setChecked(true);
-        if (sett.mode == Constants.WORK_MODE_PORTRAIT) rbWPortrait.setChecked(true);
-        if (sett.mode == Constants.WORK_MODE_LANDSCAPE) rbWLandscape.setChecked(true);
-        if (sett.mode == Constants.WORK_MODE_UNLOCK) rbWUnlock.setChecked(true);
+		if (sett.mode == Constants.WORK_MODE_ALWAYS)
+			rbWAlways.setChecked(true);
+		if (sett.mode == Constants.WORK_MODE_PORTRAIT)
+			rbWPortrait.setChecked(true);
+		if (sett.mode == Constants.WORK_MODE_LANDSCAPE)
+			rbWLandscape.setChecked(true);
+		if (sett.mode == Constants.WORK_MODE_UNLOCK)
+			rbWUnlock.setChecked(true);
 
-        RadioGroup rgWorkMode = findViewById(R.id.rg_work_mode);
-        rgWorkMode.setOnCheckedChangeListener((radioGroup, checkedId) -> {
-            if (checkedId == R.id.rb_work_always) sett.mode = Constants.WORK_MODE_ALWAYS;
-            if (checkedId == R.id.rb_work_portrait) sett.mode = Constants.WORK_MODE_PORTRAIT;
-            if (checkedId == R.id.rb_work_landscape) sett.mode = Constants.WORK_MODE_LANDSCAPE;
-            if (checkedId == R.id.rb_work_unlock) sett.mode = Constants.WORK_MODE_UNLOCK;
+		RadioGroup rgWorkMode = findViewById(R.id.rg_work_mode);
+		rgWorkMode.setOnCheckedChangeListener((radioGroup, checkedId) -> {
+			if (checkedId == R.id.rb_work_always)
+				sett.mode = Constants.WORK_MODE_ALWAYS;
 
-            sett.save();
-            sendBroadcastToService(Constants.SERVICE_INTENT_PAYLOAD_SET);
+			if (checkedId == R.id.rb_work_portrait)
+				sett.mode = Constants.WORK_MODE_PORTRAIT;
 
-            if (checkedId == R.id.rb_work_unlock) requestPhonePermission();
-        });
+			if (checkedId == R.id.rb_work_landscape)
+				sett.mode = Constants.WORK_MODE_LANDSCAPE;
 
-        TextView textView = findViewById(R.id.tv_dontkillmyapp);
-        textView.setMovementMethod(LinkMovementMethod.getInstance());
-    }
+			if (checkedId == R.id.rb_work_unlock)
+				sett.mode = Constants.WORK_MODE_UNLOCK;
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.main, menu);
-        return super.onCreateOptionsMenu(menu);
-    }
+			sett.save();
+			sendBroadcastToService(Constants.SERVICE_INTENT_PAYLOAD_SET);
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            openAppSettings();
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
+			if (checkedId == R.id.rb_work_unlock)
+				requestPhonePermission();
+		});
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        if (checkAndRequestPermissions()) {
-            if (isServiceRunning()) {
-                displayServiceStatus(1);
-            } else {
-                runService();
-                displayServiceStatus(-1);
-            }
+		TextView textView = findViewById(R.id.tv_dontkillmyapp);
+		textView.setMovementMethod(LinkMovementMethod.getInstance());
+	}
 
-            if (sett.mode == Constants.WORK_MODE_UNLOCK) {
-                requestPhonePermission();
-            }
-        }
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		getMenuInflater().inflate(R.menu.main, menu);
+		return super.onCreateOptionsMenu(menu);
+	}
 
-        LinearLayout llPower = findViewById(R.id.ll_ignore_battery_request);
-        llPower.setVisibility(powerMan.isIgnoringBatteryOptimizations(getPackageName()) ? View.GONE : View.VISIBLE);
-    }
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		int id = item.getItemId();
+		if (id == R.id.action_settings) {
+			openAppSettings();
+			return true;
+		}
+		return super.onOptionsItemSelected(item);
+	}
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQ_WRITE_SETTINGS) {
-            isDialogShown = false;
-            // Return from system settings: request service to bring overlay back
-            sendBroadcastToService(11);
-            
-            if (Settings.System.canWrite(this)) {
-                if (isServiceRunning()) displayServiceStatus(1);
-                else {
-                    runService();
-                    displayServiceStatus(-1);
-                }
-                if (sett.mode == Constants.WORK_MODE_UNLOCK) requestPhonePermission();
-            } else {
-                displayServiceStatus(0);
-            }
-        }
-    }
+	@Override
+	public void onResume() {
+		super.onResume();
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        // User interacted with dialog: signal service to bring overlay back
-        sendBroadcastToService(11);
+		if (checkAndRequestPermissions()) {
+			if (isServiceRunning()) {
+				displayServiceStatus(1);
+			} else {
+				runService();
+				displayServiceStatus(-1);
+			}
+		}
 
-        if (requestCode == REQ_RUNTIME_PERMS) {
-            if (permissions != null && permissions.length > 0) {
-                for (int i = 0; i < permissions.length; i++) {
-                    if (Manifest.permission.READ_PHONE_STATE.equals(permissions[i])) {
-                        if (grantResults.length > i && grantResults[i] == PackageManager.PERMISSION_GRANTED) {
-                            Toast.makeText(this, R.string.permission_phone_granted, Toast.LENGTH_SHORT).show();
-                        } else {
-                            Toast.makeText(this, R.string.permission_phone_denied, Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                }
-            }
-        }
-    }
+		LinearLayout llPower = findViewById(R.id.ll_ignore_battery_request);
+		if (powerMan.isIgnoringBatteryOptimizations(getPackageName())) {
+			llPower.setVisibility(View.GONE);
+		} else {
+			llPower.setVisibility(View.VISIBLE);
+		}
+	}
 
-    private void runService() {
-        startService(new Intent(getBaseContext(), LightService.class));
-        Toast.makeText(this, getResources().getString(R.string.starting_service), Toast.LENGTH_SHORT).show();
-    }
+	private void runService() {
+		startService(new Intent(getBaseContext(), LightService.class));
+		Toast.makeText(this, getResources().getString(R.string.starting_service), Toast.LENGTH_SHORT).show();
+	}
 
-    private void killService() {
-        stopService(new Intent(getBaseContext(), LightService.class));
-    }
+	private void killService() {
+		stopService(new Intent(getBaseContext(), LightService.class));
+	}
 
-    private boolean isServiceRunning() {
-        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-            if (LightService.class.getName().equals(service.service.getClassName())) {
-                return true;
-            }
-        }
-        return false;
-    }
+	private boolean isServiceRunning() {
+		ActivityManager activityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
 
-    private void sendBroadcastToService(int payload) {
-        Intent i = new Intent();
-        i.putExtra(Constants.SERVICE_INTENT_EXTRA, payload);
-        i.setAction(Constants.SERVICE_INTENT_ACTION);
-        sendBroadcast(i);
-    }
+		for (ActivityManager.RunningServiceInfo service : activityManager.getRunningServices(Integer.MAX_VALUE)) {
+			if (LightService.class.getName().equals(service.service.getClassName())) {
+				return true;
+			}
+		}
+		return false;
+	}
 
-    private void requestNotificationPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (this.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-                this.requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS}, REQ_RUNTIME_PERMS);
-            }
-        }
-    }
+	private void sendBroadcastToService(int payload) {
+		Intent i = new Intent();
+		i.putExtra(Constants.SERVICE_INTENT_EXTRA, payload);
+		i.setAction(Constants.SERVICE_INTENT_ACTION);
+		sendBroadcast(i);
+	}
 
-    private void requestPhonePermission() {
-        if (this.checkSelfPermission(Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
-            // Unblock "Allow" button: Hide overlay
-            sendBroadcastToService(10);
-            this.requestPermissions(new String[]{Manifest.permission.READ_PHONE_STATE}, REQ_RUNTIME_PERMS);
-        }
-    }
+	private void requestNotificationPermission() {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+			if (this.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+				this.requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS}, 123);
+			}
+		}
+	}
 
-    private boolean checkAndRequestPermissions() {
-        if (Settings.System.canWrite(this)) {
-            return true;
-        } else {
-            if (isDialogShown) return false;
+	private void requestPhonePermission() {
+		if (this.checkSelfPermission(Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+			this.requestPermissions(new String[]{Manifest.permission.READ_PHONE_STATE}, 123);
+		}
+	}
 
-            // Unblock "Allow" button: Hide overlay
-            sendBroadcastToService(10);
+	private boolean checkAndRequestPermissions() {
+		if (Settings.System.canWrite(this)) {
+			return true;
+		} else {
+			if (isDialogShown)
+				return false;
 
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setMessage(R.string.permission_request);
-            builder.setPositiveButton(R.string.settings, (dialog, id) -> {
-                Intent intent = new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS,
-                        Uri.parse("package:" + getPackageName()));
-                startActivityForResult(intent, REQ_WRITE_SETTINGS);
-            });
-            builder.setNegativeButton("Cancel", (dialog, id) -> {
-                isDialogShown = false;
-                sendBroadcastToService(11); // Bring it back if user cancels
-            });
+			AlertDialog.Builder builder = new AlertDialog.Builder(this);
+			builder.setMessage(R.string.permission_request);
+			builder.setPositiveButton(R.string.settings, (dialog, id) -> {
+				startActivityForResult(new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS), 0);
+				isDialogShown = false;
+			});
 
-            AlertDialog dialog = builder.create();
-            dialog.setCanceledOnTouchOutside(false);
-            dialog.setCancelable(false);
-            dialog.show();
-            isDialogShown = true;
-            return false;
-        }
-    }
+			AlertDialog dialog = builder.create();
+			dialog.setCanceledOnTouchOutside(false);
+			dialog.setCancelable(false);
+			dialog.show();
+			isDialogShown = true;
+			return false;
+		}
+	}
 
-    private void openAppSettings() {
-        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-        intent.setData(Uri.parse("package:" + getPackageName()));
-        startActivity(intent);
-    }
+	private void openAppSettings() {
+		Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+		intent.setData(Uri.parse("package:" + getPackageName()));
+		startActivity(intent);
+	}
 
-    private void displayServiceStatus(int status) {
-        switch (status) {
-            case 0:
-                btnStart.setText(R.string.start);
-                tvState.setTextColor(getResources().getColor(R.color.red, null));
-                tvState.setText(R.string.service_stopped);
-                break;
-            case 1:
-                btnStart.setText(R.string.stop);
-                tvState.setTextColor(getResources().getColor(R.color.green, null));
-                tvState.setText(R.string.service_running);
-                break;
-            case -1:
-                btnStart.setText(R.string.stop);
-                tvState.setTextColor(getResources().getColor(R.color.gray, null));
-                tvState.setText(R.string.starting_service);
-        }
-    }
+	private void displayServiceStatus(int status) {
+		switch (status) {
+			case 0:
+				btnStart.setText(R.string.start);
+				tvState.setTextColor(getResources().getColor(R.color.red, null));
+				tvState.setText(R.string.service_stopped);
+				break;
+			case 1:
+				btnStart.setText(R.string.stop);
+				tvState.setTextColor(getResources().getColor(R.color.green, null));
+				tvState.setText(R.string.service_running);
+				break;
+			case -1:
+				btnStart.setText(R.string.stop);
+				tvState.setTextColor(getResources().getColor(R.color.gray, null));
+				tvState.setText(R.string.starting_service);
+		}
+	}
 
-    private void refillCollapsibleSettings() {
-        etSensor1.setText(String.valueOf(sett.l1));
-        etSensor2.setText(String.valueOf(sett.l2));
-        etSensor3.setText(String.valueOf(sett.l3));
-        etSensor4.setText(String.valueOf(sett.l4));
+	private void refillCollapsibleSettings() {
+		etSensor1.setText(String.valueOf(sett.l1));
+		etSensor2.setText(String.valueOf(sett.l2));
+		etSensor3.setText(String.valueOf(sett.l3));
+		etSensor4.setText(String.valueOf(sett.l4));
 
-        etBrightness1.setText(String.valueOf(sett.b1));
-        etBrightness2.setText(String.valueOf(sett.b2));
-        etBrightness3.setText(String.valueOf(sett.b3));
-        etBrightness4.setText(String.valueOf(sett.b4));
-    }
+		etBrightness1.setText(String.valueOf(sett.b1));
+		etBrightness2.setText(String.valueOf(sett.b2));
+		etBrightness3.setText(String.valueOf(sett.b3));
+		etBrightness4.setText(String.valueOf(sett.b4));
+	}
 }
