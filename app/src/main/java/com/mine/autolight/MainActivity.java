@@ -20,299 +20,337 @@ import android.widget.*;
 
 public class MainActivity extends Activity {
 
-    private static final int REQ_WRITE_SETTINGS = 100;
-    private static final int REQ_RUNTIME_PERMS = 123;
+	private static final int REQ_WRITE_SETTINGS = 100; // requestCode for ACTION_MANAGE_WRITE_SETTINGS
+	private static final int REQ_RUNTIME_PERMS = 123; // requestCode used for runtime permission requests
 
-    private Button btnStart;
-    private TextView tvState;
+	private Button btnStart;
+	private TextView tvState;
 
-    private EditText etSensor1, etSensor2, etSensor3, etSensor4;
-    private EditText etBrightness1, etBrightness2, etBrightness3, etBrightness4;
+	private EditText etSensor1, etSensor2, etSensor3, etSensor4;
+	private EditText etBrightness1, etBrightness2, etBrightness3, etBrightness4;
 
-    private PowerManager powerMan;
-    private MySettings sett;
+	private PowerManager powerMan;
+	private MySettings sett;
 
-    private boolean isExpanded = false;
-    private boolean isDialogShown = false;
+	private boolean isExpanded = false;
+	private boolean isDialogShown = false;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_main);
 
-        powerMan = (PowerManager) getSystemService(POWER_SERVICE);
-        sett = new MySettings(this);
+		powerMan = (PowerManager) getSystemService(POWER_SERVICE);
+		sett = new MySettings(this);
 
-        Button btnExpand = findViewById(R.id.btn_expand);
-        LinearLayout llHidden = findViewById(R.id.ll_hidden_settings);
-        llHidden.setVisibility(View.GONE);
-        btnExpand.setOnClickListener(arg0 -> {
-            if (isExpanded) {
-                llHidden.setVisibility(View.GONE);
-                btnExpand.setText(R.string.show_config);
-                isExpanded = false;
-            } else {
-                llHidden.setVisibility(View.VISIBLE);
-                btnExpand.setText(R.string.hide_config);
-                isExpanded = true;
-                refillCollapsibleSettings();
-                requestNotificationPermission();
-            }
-        });
+		Button btnExpand = findViewById(R.id.btn_expand);
+		LinearLayout llHidden = findViewById(R.id.ll_hidden_settings);
+		llHidden.setVisibility(View.GONE);
+		btnExpand.setOnClickListener(arg0 -> {
+			if (isExpanded) {
+				llHidden.setVisibility(View.GONE);
+				btnExpand.setText(R.string.show_config);
+				isExpanded = false;
+			} else {
+				llHidden.setVisibility(View.VISIBLE);
+				btnExpand.setText(R.string.hide_config);
+				isExpanded = true;
+				refillCollapsibleSettings();
+				requestNotificationPermission();
+			}
+		});
 
-        tvState = findViewById(R.id.tv_service_state);
-        btnStart = findViewById(R.id.btn_start_stop);
-        btnStart.setOnClickListener(arg0 -> {
-            if (isServiceRunning()) {
-                killService();
-                displayServiceStatus(0);
-            } else {
-                // Manually starting service should still respect permission logic
-                attemptToStartService();
-            }
-        });
+		tvState = findViewById(R.id.tv_service_state);
+		btnStart = findViewById(R.id.btn_start_stop);
+		btnStart.setOnClickListener(arg0 -> {
+			if (isServiceRunning()) {
+				killService();
+				displayServiceStatus(0);
+			} else {
+				runService();
+				displayServiceStatus(-1);
+			}
+		});
 
-        Button btnState = findViewById(R.id.btn_get_state);
-        btnState.setOnClickListener(arg0 -> {
-            displayServiceStatus(isServiceRunning() ? 1 : 0);
-            sendBroadcastToService(Constants.SERVICE_INTENT_PAYLOAD_PING);
-        });
+		Button btnState = findViewById(R.id.btn_get_state);
+		btnState.setOnClickListener(arg0 -> {
+			if (isServiceRunning()) {
+				displayServiceStatus(1);
+			} else {
+				displayServiceStatus(0);
+			}
 
-        Button btnRequest = findViewById(R.id.btn_request);
-        btnRequest.setOnClickListener(arg0 -> {
-            if (!powerMan.isIgnoringBatteryOptimizations(getPackageName())) {
-                Intent intent = new Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
-                intent.setData(Uri.parse("package:" + getPackageName()));
-                startActivity(intent);
-            }
-        });
+			sendBroadcastToService(Constants.SERVICE_INTENT_PAYLOAD_PING);
+		});
 
-        etSensor1 = findViewById(R.id.et_sensor_value_1);
-        etSensor2 = findViewById(R.id.et_sensor_value_2);
-        etSensor3 = findViewById(R.id.et_sensor_value_3);
-        etSensor4 = findViewById(R.id.et_sensor_value_4);
+		Button btnRequest = findViewById(R.id.btn_request);
+		btnRequest.setOnClickListener(arg0 -> {
+			if (!powerMan.isIgnoringBatteryOptimizations(getPackageName())) {
+				Intent intent = new Intent();
+				intent.setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
+				intent.setData(Uri.parse("package:" + getPackageName()));
+				startActivity(intent);
+			}
+		});
 
-        etBrightness1 = findViewById(R.id.et_brightness_value_1);
-        etBrightness2 = findViewById(R.id.et_brightness_value_2);
-        etBrightness3 = findViewById(R.id.et_brightness_value_3);
-        etBrightness4 = findViewById(R.id.et_brightness_value_4);
+		etSensor1 = findViewById(R.id.et_sensor_value_1);
+		etSensor2 = findViewById(R.id.et_sensor_value_2);
+		etSensor3 = findViewById(R.id.et_sensor_value_3);
+		etSensor4 = findViewById(R.id.et_sensor_value_4);
 
-        refillCollapsibleSettings();
+		etBrightness1 = findViewById(R.id.et_brightness_value_1);
+		etBrightness2 = findViewById(R.id.et_brightness_value_2);
+		etBrightness3 = findViewById(R.id.et_brightness_value_3);
+		etBrightness4 = findViewById(R.id.et_brightness_value_4);
 
-        Button btnSave = findViewById(R.id.btn_save_settings);
-        btnSave.setOnClickListener(arg0 -> {
-            try {
-                sett.l1 = Integer.parseInt(etSensor1.getText().toString());
-                sett.l2 = Integer.parseInt(etSensor2.getText().toString());
-                sett.l3 = Integer.parseInt(etSensor3.getText().toString());
-                sett.l4 = Integer.parseInt(etSensor4.getText().toString());
-                sett.b1 = Integer.parseInt(etBrightness1.getText().toString());
-                sett.b2 = Integer.parseInt(etBrightness2.getText().toString());
-                sett.b3 = Integer.parseInt(etBrightness3.getText().toString());
-                sett.b4 = Integer.parseInt(etBrightness4.getText().toString());
-                sett.save();
-                sendBroadcastToService(Constants.SERVICE_INTENT_PAYLOAD_SET);
-            } catch (NumberFormatException e) {
-                Toast.makeText(this, "Invalid input", Toast.LENGTH_SHORT).show();
-            }
-        });
+		refillCollapsibleSettings();
 
-        RadioGroup rgWorkMode = findViewById(R.id.rg_work_mode);
-        setupRadioButtons();
+		Button btnSave = findViewById(R.id.btn_save_settings);
+		btnSave.setOnClickListener(arg0 -> {
+			sett.l1 = Integer.parseInt(etSensor1.getText().toString());
+			sett.l2 = Integer.parseInt(etSensor2.getText().toString());
+			sett.l3 = Integer.parseInt(etSensor3.getText().toString());
+			sett.l4 = Integer.parseInt(etSensor4.getText().toString());
+			sett.b1 = Integer.parseInt(etBrightness1.getText().toString());
+			sett.b2 = Integer.parseInt(etBrightness2.getText().toString());
+			sett.b3 = Integer.parseInt(etBrightness3.getText().toString());
+			sett.b4 = Integer.parseInt(etBrightness4.getText().toString());
 
-        rgWorkMode.setOnCheckedChangeListener((radioGroup, checkedId) -> {
-            if (checkedId == R.id.rb_work_always) sett.mode = Constants.WORK_MODE_ALWAYS;
-            else if (checkedId == R.id.rb_work_portrait) sett.mode = Constants.WORK_MODE_PORTRAIT;
-            else if (checkedId == R.id.rb_work_landscape) sett.mode = Constants.WORK_MODE_LANDSCAPE;
-            else if (checkedId == R.id.rb_work_unlock) sett.mode = Constants.WORK_MODE_UNLOCK;
+			sett.save();
+			sendBroadcastToService(Constants.SERVICE_INTENT_PAYLOAD_SET);
+		});
 
-            sett.save();
-            sendBroadcastToService(Constants.SERVICE_INTENT_PAYLOAD_SET);
+		RadioButton rbWAlways = findViewById(R.id.rb_work_always);
+		RadioButton rbWPortrait = findViewById(R.id.rb_work_portrait);
+		RadioButton rbWLandscape = findViewById(R.id.rb_work_landscape);
+		RadioButton rbWUnlock = findViewById(R.id.rb_work_unlock);
 
-            if (sett.mode == Constants.WORK_MODE_UNLOCK) {
-                requestPhonePermission();
-            }
-        });
+		if (sett.mode == Constants.WORK_MODE_ALWAYS)
+			rbWAlways.setChecked(true);
+		if (sett.mode == Constants.WORK_MODE_PORTRAIT)
+			rbWPortrait.setChecked(true);
+		if (sett.mode == Constants.WORK_MODE_LANDSCAPE)
+			rbWLandscape.setChecked(true);
+		if (sett.mode == Constants.WORK_MODE_UNLOCK)
+			rbWUnlock.setChecked(true);
 
-        TextView textView = findViewById(R.id.tv_dontkillmyapp);
-        textView.setMovementMethod(LinkMovementMethod.getInstance());
-    }
+		RadioGroup rgWorkMode = findViewById(R.id.rg_work_mode);
+		rgWorkMode.setOnCheckedChangeListener((radioGroup, checkedId) -> {
+			if (checkedId == R.id.rb_work_always)
+				sett.mode = Constants.WORK_MODE_ALWAYS;
 
-    private void setupRadioButtons() {
-        if (sett.mode == Constants.WORK_MODE_ALWAYS) ((RadioButton)findViewById(R.id.rb_work_always)).setChecked(true);
-        if (sett.mode == Constants.WORK_MODE_PORTRAIT) ((RadioButton)findViewById(R.id.rb_work_portrait)).setChecked(true);
-        if (sett.mode == Constants.WORK_MODE_LANDSCAPE) ((RadioButton)findViewById(R.id.rb_work_landscape)).setChecked(true);
-        if (sett.mode == Constants.WORK_MODE_UNLOCK) ((RadioButton)findViewById(R.id.rb_work_unlock)).setChecked(true);
-    }
+			if (checkedId == R.id.rb_work_portrait)
+				sett.mode = Constants.WORK_MODE_PORTRAIT;
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        
-        // 1. Check Write Settings first
-        if (Settings.System.canWrite(this)) {
-            // 2. Check if we need Phone Permission before starting
-            if (sett.mode == Constants.WORK_MODE_UNLOCK && 
-                checkSelfPermission(Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
-                requestPhonePermission();
-            } else {
-                // 3. All good, sync service state
-                if (isServiceRunning()) {
-                    displayServiceStatus(1);
-                } else {
-                    runService();
-                    displayServiceStatus(-1);
-                }
-            }
-        } else {
-            checkAndRequestPermissions(); // Show the Write Settings dialog
-        }
+			if (checkedId == R.id.rb_work_landscape)
+				sett.mode = Constants.WORK_MODE_LANDSCAPE;
 
-        LinearLayout llPower = findViewById(R.id.ll_ignore_battery_request);
-        llPower.setVisibility(powerMan.isIgnoringBatteryOptimizations(getPackageName()) ? View.GONE : View.VISIBLE);
-    }
+			if (checkedId == R.id.rb_work_unlock)
+				sett.mode = Constants.WORK_MODE_UNLOCK;
 
-    private void attemptToStartService() {
-        if (!Settings.System.canWrite(this)) {
-            checkAndRequestPermissions();
-            return;
-        }
-        if (sett.mode == Constants.WORK_MODE_UNLOCK && 
-            checkSelfPermission(Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
-            requestPhonePermission();
-            return;
-        }
-        runService();
-        displayServiceStatus(-1);
-    }
+			sett.save();
+			sendBroadcastToService(Constants.SERVICE_INTENT_PAYLOAD_SET);
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQ_WRITE_SETTINGS) {
-            isDialogShown = false;
-            // Permission chain will resume in onResume()
-        }
-    }
+			if (checkedId == R.id.rb_work_unlock)
+				requestPhonePermission();
+		});
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == REQ_RUNTIME_PERMS) {
-            for (int i = 0; i < permissions.length; i++) {
-                if (Manifest.permission.READ_PHONE_STATE.equals(permissions[i])) {
-                    if (grantResults.length > i && grantResults[i] == PackageManager.PERMISSION_GRANTED) {
-                        Toast.makeText(this, R.string.permission_phone_granted, Toast.LENGTH_SHORT).show();
-                        runService(); // Safe to start now
-                    } else {
-                        Toast.makeText(this, R.string.permission_phone_denied, Toast.LENGTH_SHORT).show();
-                    }
-                }
-            }
-        }
-    }
+		TextView textView = findViewById(R.id.tv_dontkillmyapp);
+		textView.setMovementMethod(LinkMovementMethod.getInstance());
+	}
 
-    private void runService() {
-        if (!isServiceRunning()) {
-            startService(new Intent(getBaseContext(), LightService.class));
-            Toast.makeText(this, getResources().getString(R.string.starting_service), Toast.LENGTH_SHORT).show();
-        }
-    }
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		getMenuInflater().inflate(R.menu.main, menu);
+		return super.onCreateOptionsMenu(menu);
+	}
 
-    private void killService() {
-        stopService(new Intent(getBaseContext(), LightService.class));
-    }
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		int id = item.getItemId();
+		if (id == R.id.action_settings) {
+			openAppSettings();
+			return true;
+		}
+		return super.onOptionsItemSelected(item);
+	}
 
-    private boolean isServiceRunning() {
-        ActivityManager activityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-        for (ActivityManager.RunningServiceInfo service : activityManager.getRunningServices(Integer.MAX_VALUE)) {
-            if (LightService.class.getName().equals(service.service.getClassName())) {
-                return true;
-            }
-        }
-        return false;
-    }
+	@Override
+	public void onResume() {
+		super.onResume();
 
-    private void sendBroadcastToService(int payload) {
-        Intent i = new Intent();
-        i.putExtra(Constants.SERVICE_INTENT_EXTRA, payload);
-        i.setAction(Constants.SERVICE_INTENT_ACTION);
-        sendBroadcast(i);
-    }
+		// Only request runtime phone permission after WRITE_SETTINGS is available.
+		if (checkAndRequestPermissions()) {
+			if (isServiceRunning()) {
+				displayServiceStatus(1);
+			} else {
+				runService();
+				displayServiceStatus(-1);
+			}
 
-    private void requestNotificationPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (this.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-                this.requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS}, REQ_RUNTIME_PERMS);
-            }
-        }
-    }
+			// Now that write-settings access is available, request phone permission if needed.
+			if (sett.mode == Constants.WORK_MODE_UNLOCK) {
+				requestPhonePermission();
+			}
+		}
 
-    private void requestPhonePermission() {
-        if (this.checkSelfPermission(Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
-            // CRITICAL: Kill service to remove overlays before showing permission dialog
-            killService(); 
-            this.requestPermissions(new String[]{Manifest.permission.READ_PHONE_STATE}, REQ_RUNTIME_PERMS);
-        }
-    }
+		LinearLayout llPower = findViewById(R.id.ll_ignore_battery_request);
+		if (powerMan.isIgnoringBatteryOptimizations(getPackageName())) {
+			llPower.setVisibility(View.GONE);
+		} else {
+			llPower.setVisibility(View.VISIBLE);
+		}
+	}
 
-    private boolean checkAndRequestPermissions() {
-        if (Settings.System.canWrite(this)) {
-            return true;
-        } else {
-            if (isDialogShown) return false;
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
 
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setMessage(R.string.permission_request);
-            builder.setPositiveButton(R.string.settings, (dialog, id) -> {
-                Intent intent = new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS,
-                        Uri.parse("package:" + getPackageName()));
-                startActivityForResult(intent, REQ_WRITE_SETTINGS);
-            });
+		// Returned from WRITE_SETTINGS management screen
+		if (requestCode == REQ_WRITE_SETTINGS) {
+			// If the user granted WRITE_SETTINGS we can now request READ_PHONE_STATE safely.
+			if (Settings.System.canWrite(this)) {
+				// update UI / start service now that permission was granted
+				if (isServiceRunning()) {
+					displayServiceStatus(1);
+				} else {
+					runService();
+					displayServiceStatus(-1);
+				}
 
-            AlertDialog dialog = builder.create();
-            dialog.setCanceledOnTouchOutside(false);
-            dialog.setCancelable(false);
-            dialog.show();
-            isDialogShown = true;
-            return false;
-        }
-    }
+				if (sett.mode == Constants.WORK_MODE_UNLOCK) {
+					requestPhonePermission();
+				}
+			} else {
+				// user didn't grant write settings — keep UI consistent
+				displayServiceStatus(0);
+			}
+		}
+	}
 
-    private void openAppSettings() {
-        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-        intent.setData(Uri.parse("package:" + getPackageName()));
-        startActivity(intent);
-    }
+	@Override
+	public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+		super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+		if (requestCode == REQ_RUNTIME_PERMS) {
+			// We requested READ_PHONE_STATE (and/or POST_NOTIFICATIONS). If the phone permission is denied,
+			// the service will still work, but unlock/rotate mode won't be able to detect ringing; inform the user.
+			if (permissions != null && permissions.length > 0) {
+				for (int i = 0; i < permissions.length; i++) {
+					if (Manifest.permission.READ_PHONE_STATE.equals(permissions[i])) {
+						if (grantResults.length > i && grantResults[i] == PackageManager.PERMISSION_GRANTED) {
+							Toast.makeText(this, R.string.permission_phone_granted, Toast.LENGTH_SHORT).show();
+						} else {
+							Toast.makeText(this, R.string.permission_phone_denied, Toast.LENGTH_SHORT).show();
+						}
+					}
+				}
+			}
+		}
+	}
 
-    private void displayServiceStatus(int status) {
-        switch (status) {
-            case 0:
-                btnStart.setText(R.string.start);
-                tvState.setTextColor(getResources().getColor(R.color.red, null));
-                tvState.setText(R.string.service_stopped);
-                break;
-            case 1:
-                btnStart.setText(R.string.stop);
-                tvState.setTextColor(getResources().getColor(R.color.green, null));
-                tvState.setText(R.string.service_running);
-                break;
-            case -1:
-                btnStart.setText(R.string.stop);
-                tvState.setTextColor(getResources().getColor(R.color.gray, null));
-                tvState.setText(R.string.starting_service);
-        }
-    }
+	private void runService() {
+		startService(new Intent(getBaseContext(), LightService.class));
+		Toast.makeText(this, getResources().getString(R.string.starting_service), Toast.LENGTH_SHORT).show();
+	}
 
-    private void refillCollapsibleSettings() {
-        etSensor1.setText(String.valueOf(sett.l1));
-        etSensor2.setText(String.valueOf(sett.l2));
-        etSensor3.setText(String.valueOf(sett.l3));
-        etSensor4.setText(String.valueOf(sett.l4));
+	private void killService() {
+		stopService(new Intent(getBaseContext(), LightService.class));
+	}
 
-        etBrightness1.setText(String.valueOf(sett.b1));
-        etBrightness2.setText(String.valueOf(sett.b2));
-        etBrightness3.setText(String.valueOf(sett.b3));
-        etBrightness4.setText(String.valueOf(sett.b4));
-    }
+	private boolean isServiceRunning() {
+		ActivityManager activityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+
+		for (ActivityManager.RunningServiceInfo service : activityManager.getRunningServices(Integer.MAX_VALUE)) {
+			if (LightService.class.getName().equals(service.service.getClassName())) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private void sendBroadcastToService(int payload) {
+		Intent i = new Intent();
+		i.putExtra(Constants.SERVICE_INTENT_EXTRA, payload);
+		i.setAction(Constants.SERVICE_INTENT_ACTION);
+		sendBroadcast(i);
+	}
+
+	private void requestNotificationPermission() {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+			if (this.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+				this.requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS}, REQ_RUNTIME_PERMS);
+			}
+		}
+	}
+
+	private void requestPhonePermission() {
+		// Only request runtime permission if it's not already granted.
+		if (this.checkSelfPermission(Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+			this.requestPermissions(new String[]{Manifest.permission.READ_PHONE_STATE}, REQ_RUNTIME_PERMS);
+		}
+	}
+
+	private boolean checkAndRequestPermissions() {
+		// Check WRITE_SETTINGS (modify system settings) permission first.
+		if (Settings.System.canWrite(this)) {
+			return true;
+		} else {
+			if (isDialogShown)
+				return false;
+
+			AlertDialog.Builder builder = new AlertDialog.Builder(this);
+			builder.setMessage(R.string.permission_request);
+			builder.setPositiveButton(R.string.settings, (dialog, id) -> {
+				// Open the system screen where user can grant WRITE_SETTINGS for the app.
+				Intent intent = new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS,
+						Uri.parse("package:" + getPackageName()));
+				startActivityForResult(intent, REQ_WRITE_SETTINGS);
+				isDialogShown = false;
+			});
+
+			AlertDialog dialog = builder.create();
+			dialog.setCanceledOnTouchOutside(false);
+			dialog.setCancelable(false);
+			dialog.show();
+			isDialogShown = true;
+			return false;
+		}
+	}
+
+	private void openAppSettings() {
+		Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+		intent.setData(Uri.parse("package:" + getPackageName()));
+		startActivity(intent);
+	}
+
+	private void displayServiceStatus(int status) {
+		switch (status) {
+			case 0:
+				btnStart.setText(R.string.start);
+				tvState.setTextColor(getResources().getColor(R.color.red, null));
+				tvState.setText(R.string.service_stopped);
+				break;
+			case 1:
+				btnStart.setText(R.string.stop);
+				tvState.setTextColor(getResources().getColor(R.color.green, null));
+				tvState.setText(R.string.service_running);
+				break;
+			case -1:
+				btnStart.setText(R.string.stop);
+				tvState.setTextColor(getResources().getColor(R.color.gray, null));
+				tvState.setText(R.string.starting_service);
+		}
+	}
+
+	private void refillCollapsibleSettings() {
+		etSensor1.setText(String.valueOf(sett.l1));
+		etSensor2.setText(String.valueOf(sett.l2));
+		etSensor3.setText(String.valueOf(sett.l3));
+		etSensor4.setText(String.valueOf(sett.l4));
+
+		etBrightness1.setText(String.valueOf(sett.b1));
+		etBrightness2.setText(String.valueOf(sett.b2));
+		etBrightness3.setText(String.valueOf(sett.b3));
+		etBrightness4.setText(String.valueOf(sett.b4));
+	}
 }
