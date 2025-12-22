@@ -27,7 +27,11 @@ public class LightService extends Service {
             String action = intent.getAction();
             if (action == null) return;
 
-            // FIX 1: Restore "GET DATA" and "SAVE" communication
+            // 1. Update orientation state first
+            boolean isLandscape = getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
+            lightControl.setLandscape(isLandscape);
+
+            // 2. Handle Custom UI Commands (Ping/Save)
             if (Constants.SERVICE_INTENT_ACTION.equals(action)) {
                 int payload = intent.getIntExtra(Constants.SERVICE_INTENT_EXTRA, -1);
                 if (payload == Constants.SERVICE_INTENT_PAYLOAD_PING) {
@@ -40,17 +44,13 @@ public class LightService extends Service {
                 return;
             }
 
-            // FIX 2: Update Orientation State
-            boolean isLandscape = getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
-            lightControl.setLandscape(isLandscape);
-
-            // FIX 3: Restore Mode Logic
+            // 3. Handle System Events (Unlock/Rotate)
             if (Intent.ACTION_USER_PRESENT.equals(action)) {
                 if (settings.mode == Constants.WORK_MODE_UNLOCK) {
                     lightControl.onScreenUnlock();
                 }
             } else if (Intent.ACTION_CONFIGURATION_CHANGED.equals(action)) {
-                // Trigger a refresh when the phone rotates
+                // This handles Portrait/Landscape work modes
                 lightControl.startListening();
             }
         }
@@ -65,7 +65,10 @@ public class LightService extends Service {
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_USER_PRESENT);
         filter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
-        filter.addAction(Constants.SERVICE_INTENT_ACTION); // Listen for UI buttons
+        filter.addAction(Constants.SERVICE_INTENT_ACTION);
+        
+        // Priority filter for faster unlock response
+        filter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
         
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             registerReceiver(eventReceiver, filter, Context.RECEIVER_EXPORTED);
@@ -83,7 +86,7 @@ public class LightService extends Service {
 
         Notification notification = builder
                 .setContentTitle("Auto Light Active")
-                .setContentText("Monitoring light levels")
+                .setContentText("Monitoring brightness modes")
                 .setSmallIcon(android.R.drawable.ic_menu_compass)
                 .setOngoing(true)
                 .build();
@@ -94,7 +97,6 @@ public class LightService extends Service {
             startForeground(NOTIFICATION_ID, notification);
         }
 
-        // Start listening if Always mode is active
         if (settings.mode == Constants.WORK_MODE_ALWAYS) {
             lightControl.startListening();
         }
