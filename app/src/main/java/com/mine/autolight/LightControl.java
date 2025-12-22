@@ -34,9 +34,7 @@ public class LightControl implements SensorEventListener {
     }
 
     @Override
-    public void onAccuracyChanged(Sensor arg0, int arg1) {
-        // Not used for light sensor
-    }
+    public void onAccuracyChanged(Sensor arg0, int arg1) {}
 
     @Override
     public void onSensorChanged(SensorEvent event) {
@@ -47,45 +45,62 @@ public class LightControl implements SensorEventListener {
     }
 
     private void scheduleSuspend() {
+        // Mode "Always" never stops
         if (sett.mode == Constants.WORK_MODE_ALWAYS)
             return;
 
+        // Keep alive if orientation matches the current mode
         if (sett.mode == Constants.WORK_MODE_LANDSCAPE && landscape)
             return;
 
         if (sett.mode == Constants.WORK_MODE_PORTRAIT && !landscape)
             return;
 
-        // If not in a "keep alive" mode, schedule a stop after 'pause' milliseconds
+        // If we reach here, we are in a mode that only triggers once (like Unlock)
+        // or the orientation doesn't match, so we shut down after 'pause' ms.
+        delayer.removeCallbacksAndMessages(null);
         delayer.postDelayed(new Runner(), pause);
     }
 
     private class Runner implements Runnable {
         public void run() {
-            // Phone state checking removed for privacy and IzzyOnDroid compliance
             stopListening();
         }
     }
 
+    /**
+     * RESTORED LOGIC: Validates if the sensor SHOULD be active based on current Mode.
+     */
     public void startListening() {
-        if (!onListen && lightSensor != null) {
+        boolean shouldActivate = false;
+
+        if (sett.mode == Constants.WORK_MODE_ALWAYS) {
+            shouldActivate = true;
+        } else if (sett.mode == Constants.WORK_MODE_LANDSCAPE && landscape) {
+            shouldActivate = true;
+        } else if (sett.mode == Constants.WORK_MODE_PORTRAIT && !landscape) {
+            shouldActivate = true;
+        } else if (sett.mode == Constants.WORK_MODE_UNLOCK) {
+            // Unlock triggers a temporary reading
+            shouldActivate = true;
+        }
+
+        if (shouldActivate && !onListen && lightSensor != null) {
             sMgr.registerListener(this, lightSensor, SensorManager.SENSOR_DELAY_NORMAL);
             onListen = true;
         }
+        
         scheduleSuspend();
     }
 
     public void stopListening() {
         if (onListen) {
             sMgr.unregisterListener(this);
+            onListen = false;
         }
         delayer.removeCallbacksAndMessages(null);
-        onListen = false;
     }
 
-    /**
-     * Interpolates brightness based on lux using log10 domain for better human perception.
-     */
     private void setBrightness(int lux) {
         int brightness;
         if (lux <= sett.l1) {
@@ -112,22 +127,17 @@ public class LightControl implements SensorEventListener {
             double t = 0.0;
             if (Double.compare(lx2, lx1) != 0) {
                 t = (lx - lx1) / (lx2 - lx1);
-                if (t < 0.0) t = 0.0;
-                if (t > 1.0) t = 1.0;
+                t = Math.max(0.0, Math.min(1.0, t));
             }
-
             brightness = (int) Math.round(y1 + (y2 - y1) * t);
         }
 
         tempBrightness = brightness;
 
         try {
-            int currentBrightness = Settings.System.getInt(cResolver, Settings.System.SCREEN_BRIGHTNESS, 0);
-            if (currentBrightness != brightness) {
-                Settings.System.putInt(cResolver, Settings.System.SCREEN_BRIGHTNESS, brightness);
-            }
+            Settings.System.putInt(cResolver, Settings.System.SCREEN_BRIGHTNESS, brightness);
         } catch (Exception ex) {
-            // Fails silently if WRITE_SETTINGS permission isn't granted yet
+            // Permission not granted or system restricted
         }
     }
 
@@ -138,17 +148,14 @@ public class LightControl implements SensorEventListener {
     }
 
     public void setLandscape(boolean land) {
-        landscape = land;
+        this.landscape = land;
     }
 
     public void onScreenUnlock() {
-        // Ensure manual mode is set so our app can control brightness
         try {
             Settings.System.putInt(cResolver, Settings.System.SCREEN_BRIGHTNESS_MODE,
                     Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL);
-        } catch (Exception e) {
-            // Fallback for restricted environments
-        }
+        } catch (Exception e) {}
         startListening();
     }
 
