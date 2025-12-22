@@ -106,7 +106,8 @@ public class MainActivity extends Activity {
 
                 sett.save();
                 sendBroadcastToService(Constants.SERVICE_INTENT_PAYLOAD_SET);
-                Toast.makeText(this, R.string.settings_saved, Toast.LENGTH_SHORT).show();
+                // Fixed line: Using a hardcoded string to avoid missing resource error
+                Toast.makeText(this, "Settings saved", Toast.LENGTH_SHORT).show();
             } catch (NumberFormatException e) {
                 Toast.makeText(this, "Invalid input", Toast.LENGTH_SHORT).show();
             }
@@ -131,11 +132,10 @@ public class MainActivity extends Activity {
 
             sett.save();
             sendBroadcastToService(Constants.SERVICE_INTENT_PAYLOAD_SET);
-            // requestPhonePermission() call removed here
         });
 
         TextView textView = findViewById(R.id.tv_dontkillmyapp);
-        textView.setMovementMethod(LinkMovementMethod.getInstance());
+        if (textView != null) textView.setMovementMethod(LinkMovementMethod.getInstance());
     }
 
     @Override
@@ -163,7 +163,6 @@ public class MainActivity extends Activity {
             displayServiceStatus(isServiceRunning() ? 1 : 0);
         }
 
-        // Battery optimization UI logic removed
         LinearLayout llPower = findViewById(R.id.ll_ignore_battery_request);
         if (llPower != null) llPower.setVisibility(View.GONE);
     }
@@ -183,6 +182,7 @@ public class MainActivity extends Activity {
 
     private boolean isServiceRunning() {
         ActivityManager activityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        if (activityManager == null) return false;
         for (ActivityManager.RunningServiceInfo service : activityManager.getRunningServices(Integer.MAX_VALUE)) {
             if (LightService.class.getName().equals(service.service.getClassName())) {
                 return true;
