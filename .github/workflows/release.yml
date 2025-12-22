@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - '[0-9]+.[0-9]+*'
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -34,12 +35,23 @@ jobs:
           keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
           keyPassword: ${{ secrets.KEY_PASSWORD }}
         env:
-          # This line fixes the "Couldnt find the Android build tools @ 29.0.3" error
           BUILD_TOOLS_VERSION: "34.0.0"
+
+      - name: Rename and Strip Dots
+        id: rename_apk
+        run: |
+        
+          raw_tag=${GITHUB_REF#refs/tags/}
+          clean_tag="${raw_tag//./}"
+          signed_file="${{ steps.sign_app.outputs.signedReleaseFile }}"
+          new_name="auto-light-${clean_tag}.apk"
+          mv "$signed_file" "app/build/outputs/apk/release/$new_name"
+          echo "new_path=app/build/outputs/apk/release/$new_name" >> $GITHUB_OUTPUT
 
       - name: Upload Signed APK to GitHub Release
         uses: softprops/action-gh-release@v1
         with:
-          files: ${{ steps.sign_app.outputs.signedReleaseFile }}
+          files: ${{ steps.rename_apk.outputs.new_path }}
+          generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
