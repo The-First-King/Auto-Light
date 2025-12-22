@@ -27,7 +27,7 @@ public class LightService extends Service {
             
             // Handle Screen Unlock
             if (Intent.ACTION_USER_PRESENT.equals(action)) {
-                if (settings.mode == Constants.WORK_MODE_UNLOCK_ROTATE) {
+                if (settings.mode == Constants.WORK_MODE_UNLOCK) {
                     lightControl.onScreenUnlock();
                 }
             } 
@@ -36,8 +36,9 @@ public class LightService extends Service {
                 boolean isLandscape = getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
                 lightControl.setLandscape(isLandscape);
                 
-                if (settings.mode == Constants.WORK_MODE_UNLOCK_ROTATE) {
-                    lightControl.onScreenUnlock(); // Reuse unlock logic to refresh brightness on rotate
+                // Refresh brightness on rotate if in unlock mode
+                if (settings.mode == Constants.WORK_MODE_UNLOCK) {
+                    lightControl.onScreenUnlock();
                 }
             }
         }
@@ -49,11 +50,11 @@ public class LightService extends Service {
         settings = new MySettings(this);
         lightControl = new LightControl(this);
 
-        // Register for system events
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_USER_PRESENT);
         filter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
         
+        // Security fix for Android 14+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             registerReceiver(eventReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
         } else {
@@ -74,19 +75,18 @@ public class LightService extends Service {
 
         Notification notification = builder
                 .setContentTitle("Auto Light Active")
-                .setContentText("Adjusting brightness based on light")
+                .setContentText("Adjusting brightness based on ambient light")
                 .setSmallIcon(android.R.drawable.ic_menu_compass) 
                 .setOngoing(true)
                 .build();
 
-        // Android 14+ requirement
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             startForeground(NOTIFICATION_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC);
         } else {
             startForeground(NOTIFICATION_ID, notification);
         }
 
-        // Start listening based on the mode
+        // Logic check: only start continuous polling if mode is ALWAYS
         if (settings.mode == Constants.WORK_MODE_ALWAYS) {
             lightControl.startListening();
         }
@@ -105,6 +105,7 @@ public class LightService extends Service {
 
     @Override
     public void onDestroy() {
+        // Clean up: stop the sensor and the receiver
         lightControl.stopListening();
         unregisterReceiver(eventReceiver);
         super.onDestroy();
