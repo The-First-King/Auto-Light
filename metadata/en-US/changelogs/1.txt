@@ -1,1 +1,1 @@
-1
+Initial release of Auto Light utility for basic adaptive brightness replacement using light sensor data. This represents the initial fork of the Auto-Shine project. It introduces a rebranded name and logo, alongside minor UI enhancements within the settings menu.
