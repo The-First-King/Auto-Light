@@ -12,7 +12,12 @@ android {
         targetSdk 35
         versionCode 2
         versionName "2.2-test"
+        
+        // This is fine, but in newer Gradle versions, 
+        // it's often handled automatically by the project name
         archivesBaseName = applicationId
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
@@ -21,6 +26,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_11
         targetCompatibility JavaVersion.VERSION_11
@@ -30,4 +36,21 @@ android {
         includeInApk = false
         includeInBundle = false
     }
+}
+
+dependencies {
+    // Core AndroidX libraries for UI and backward compatibility
+    implementation 'androidx.appcompat:appcompat:1.7.0'
+    implementation 'com.google.android.material:material:1.12.0'
+    
+    // THIS FIXES THE XML ERROR:
+    implementation 'androidx.constraintlayout:constraintlayout:2.2.0'
+    
+    // THIS ALLOWS THE NEW LightService.java TO RUN:
+    implementation 'androidx.core:core:1.15.0'
+
+    // Testing dependencies (standard)
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.2.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
 }
