@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true">
@@ -15,9 +14,8 @@
             android:id="@+id/tv_service_state"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/service_stopped"
+            android:text="Service Stopped"
             android:textSize="20sp"
-            android:textStyle="bold"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
@@ -26,13 +24,12 @@
             android:id="@+id/btn_start_stop"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:layout_marginEnd="8dp"
-            android:text="@string/start"
+            android:layout_marginTop="16dp"
+            android:text="Start"
             app:layout_constraintTop_toBottomOf="@id/tv_service_state"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/btn_get_state"
-            app:layout_constraintHorizontal_weight="2" />
+            android:layout_marginEnd="8dp" />
 
         <Button
             android:id="@+id/btn_get_state"
@@ -41,36 +38,61 @@
             android:text="Ping"
             app:layout_constraintTop_toTopOf="@id/btn_start_stop"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/btn_start_stop"
-            app:layout_constraintHorizontal_weight="1" />
+            app:layout_constraintStart_toEndOf="@id/btn_start_stop" />
 
         <Button
             android:id="@+id/btn_expand"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="@string/show_config"
-            app:layout_constraintTop_toBottomOf="@id/btn_start_stop"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+            android:text="Show Configuration"
+            app:layout_constraintTop_toBottomOf="@id/btn_start_stop" />
 
         <LinearLayout
             android:id="@+id/ll_hidden_settings"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:visibility="gone"
-            app:layout_constraintTop_toBottomOf="@id/btn_expand"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            tools:visibility="visible">
+            app:layout_constraintTop_toBottomOf="@id/btn_expand">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Work Mode:"
+                android:layout_marginTop="10dp"/>
+
+            <RadioGroup
+                android:id="@+id/rg_work_mode"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <RadioButton android:id="@+id/rb_work_always" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Always"/>
+                <RadioButton android:id="@+id/rb_work_portrait" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Portrait Only"/>
+                <RadioButton android:id="@+id/rb_work_landscape" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Landscape Only"/>
+                <RadioButton android:id="@+id/rb_work_unlock" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="On Unlock"/>
+            </RadioGroup>
+
+            <EditText android:id="@+id/et_sensor_value_1" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Sensor Threshold 1" android:inputType="number"/>
+            <EditText android:id="@+id/et_brightness_value_1" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Brightness 1" android:inputType="number"/>
+            <EditText android:id="@+id/et_sensor_value_2" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Sensor Threshold 2" android:inputType="number"/>
+            <EditText android:id="@+id/et_brightness_value_2" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Brightness 2" android:inputType="number"/>
+            <EditText android:id="@+id/et_sensor_value_3" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Sensor Threshold 3" android:inputType="number"/>
+            <EditText android:id="@+id/et_brightness_value_3" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Brightness 3" android:inputType="number"/>
+            <EditText android:id="@+id/et_sensor_value_4" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Sensor Threshold 4" android:inputType="number"/>
+            <EditText android:id="@+id/et_brightness_value_4" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Brightness 4" android:inputType="number"/>
 
             <Button
                 android:id="@+id/btn_save_settings"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
                 android:text="Save Settings" />
+
+            <TextView
+                android:id="@+id/tv_dontkillmyapp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="10dp"
+                android:text="Need help? Visit dontkillmyapp.com"/>
         </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
