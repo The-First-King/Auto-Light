@@ -2,16 +2,13 @@ package com.mine.autolight;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.ActivityManager;
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.text.method.LinkMovementMethod;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -37,9 +34,11 @@ public class MainActivity extends Activity {
 
         sett = new MySettings(this);
 
+        // --- Collapsible Settings Logic ---
         Button btnExpand = findViewById(R.id.btn_expand);
         LinearLayout llHidden = findViewById(R.id.ll_hidden_settings);
         llHidden.setVisibility(View.GONE);
+
         btnExpand.setOnClickListener(arg0 -> {
             if (isExpanded) {
                 llHidden.setVisibility(View.GONE);
@@ -54,6 +53,7 @@ public class MainActivity extends Activity {
             }
         });
 
+        // --- Service Control Logic ---
         tvState = findViewById(R.id.tv_service_state);
         btnStart = findViewById(R.id.btn_start_stop);
         btnStart.setOnClickListener(arg0 -> {
@@ -66,16 +66,14 @@ public class MainActivity extends Activity {
             }
         });
 
+        // --- Status Check Logic ---
         Button btnState = findViewById(R.id.btn_get_state);
         btnState.setOnClickListener(arg0 -> {
-            if (isServiceRunning()) {
-                displayServiceStatus(1);
-            } else {
-                displayServiceStatus(0);
-            }
+            displayServiceStatus(isServiceRunning() ? 1 : 0);
             sendBroadcastToService(Constants.SERVICE_INTENT_PAYLOAD_PING);
         });
 
+        // --- Settings Input Logic ---
         etSensor1 = findViewById(R.id.et_sensor_value_1);
         etSensor2 = findViewById(R.id.et_sensor_value_2);
         etSensor3 = findViewById(R.id.et_sensor_value_3);
@@ -102,13 +100,13 @@ public class MainActivity extends Activity {
 
                 sett.save();
                 sendBroadcastToService(Constants.SERVICE_INTENT_PAYLOAD_SET);
-                // Fixed line: Using a hardcoded string to avoid missing resource error
                 Toast.makeText(this, "Settings saved", Toast.LENGTH_SHORT).show();
             } catch (NumberFormatException e) {
                 Toast.makeText(this, "Invalid input", Toast.LENGTH_SHORT).show();
             }
         });
 
+        // --- Work Mode Radio Logic ---
         RadioButton rbWAlways = findViewById(R.id.rb_work_always);
         RadioButton rbWPortrait = findViewById(R.id.rb_work_portrait);
         RadioButton rbWLandscape = findViewById(R.id.rb_work_landscape);
@@ -170,15 +168,12 @@ public class MainActivity extends Activity {
         stopService(new Intent(this, LightService.class));
     }
 
+    /**
+     * Optimized Service Check
+     * Accesses the static boolean from LightService instead of looping through all system services.
+     */
     private boolean isServiceRunning() {
-        ActivityManager activityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-        if (activityManager == null) return false;
-        for (ActivityManager.RunningServiceInfo service : activityManager.getRunningServices(Integer.MAX_VALUE)) {
-            if (LightService.class.getName().equals(service.service.getClassName())) {
-                return true;
-            }
-        }
-        return false;
+        return LightService.isRunning;
     }
 
     private void sendBroadcastToService(int payload) {
@@ -235,6 +230,7 @@ public class MainActivity extends Activity {
                 break;
             case -1:
                 tvState.setText(R.string.starting_service);
+                break;
         }
     }
 
