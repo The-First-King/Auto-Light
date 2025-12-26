@@ -24,5 +24,4 @@
     <string name="battery_optimizations">Battery optimizations may suspend background service.</string>
     <string name="starting_service">Starting service</string>
     <string name="m_landscape">Landscape only</string>
-    <string name="config_updated">Config updated</string>
 </resources>
