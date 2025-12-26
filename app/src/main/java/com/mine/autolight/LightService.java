@@ -15,6 +15,9 @@ import android.os.IBinder;
 import android.widget.Toast;
 
 public class LightService extends Service {
+    // This variable is accessible from MainActivity via LightService.isRunning
+    public static boolean isRunning = false;
+
     private static final int NOTIFICATION_ID = 1;
     private static final String CHANNEL_ID = "AutoLightServiceChannel";
 
@@ -27,11 +30,9 @@ public class LightService extends Service {
             String action = intent.getAction();
             if (action == null) return;
 
-            // 1. Update orientation state first
             boolean isLandscape = getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
             lightControl.setLandscape(isLandscape);
 
-            // 2. Handle Custom UI Commands (Ping/Save)
             if (Constants.SERVICE_INTENT_ACTION.equals(action)) {
                 int payload = intent.getIntExtra(Constants.SERVICE_INTENT_EXTRA, -1);
                 if (payload == Constants.SERVICE_INTENT_PAYLOAD_PING) {
@@ -44,13 +45,11 @@ public class LightService extends Service {
                 return;
             }
 
-            // 3. Handle System Events (Unlock/Rotate)
             if (Intent.ACTION_USER_PRESENT.equals(action)) {
                 if (settings.mode == Constants.WORK_MODE_UNLOCK) {
                     lightControl.onScreenUnlock();
                 }
             } else if (Intent.ACTION_CONFIGURATION_CHANGED.equals(action)) {
-                // This handles Portrait/Landscape work modes
                 lightControl.startListening();
             }
         }
@@ -59,6 +58,9 @@ public class LightService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        // Update the flag immediately when service starts
+        isRunning = true;
+        
         settings = new MySettings(this);
         lightControl = new LightControl(this);
 
@@ -66,8 +68,6 @@ public class LightService extends Service {
         filter.addAction(Intent.ACTION_USER_PRESENT);
         filter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
         filter.addAction(Constants.SERVICE_INTENT_ACTION);
-        
-        // Priority filter for faster unlock response
         filter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
         
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -115,6 +115,9 @@ public class LightService extends Service {
 
     @Override
     public void onDestroy() {
+        // Update the flag when service is killed
+        isRunning = false;
+        
         lightControl.stopListening();
         unregisterReceiver(eventReceiver);
         super.onDestroy();
