@@ -11,11 +11,9 @@ public class AutoStart extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        // Verify that we are responding to the correct intent
         if (intent != null && Intent.ACTION_BOOT_COMPLETED.equals(intent.getAction())) {
             Log.d(TAG, "Boot completed detected. Starting LightService...");
 
-            // Create the intent for your service
             Intent serviceIntent = new Intent(context, LightService.class);
 
             try {
