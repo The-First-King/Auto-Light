@@ -38,11 +38,15 @@ public class LightControl implements SensorEventListener {
     @Override
     public void onSensorChanged(SensorEvent event) {
         if (event.sensor.getType() == Sensor.TYPE_LIGHT) {
-            lux = event.values[0];
-            setBrightness((int) lux);
+            float currentLux = event.values[0];
             
-            if (sett.mode == Constants.WORK_MODE_UNLOCK) {
-                stopListening();
+            if (currentLux >= 0) {
+                lux = currentLux;
+                setBrightness((int) lux);
+                
+                if (sett.mode == Constants.WORK_MODE_UNLOCK) {
+                    stopListening();
+                }
             }
         }
     }
