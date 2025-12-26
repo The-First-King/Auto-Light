@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
@@ -26,6 +27,9 @@ public class MainActivity extends Activity {
 
     private boolean isExpanded = false;
     private boolean isDialogShown = false;
+
+    // Use a constant for the preference key
+    private static final String PREF_ENABLED = "service_enabled_by_user";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,9 +62,11 @@ public class MainActivity extends Activity {
         btnStart = findViewById(R.id.btn_start_stop);
         btnStart.setOnClickListener(arg0 -> {
             if (isServiceRunning()) {
+                setServiceEnabledPref(false); // Save that user wants it OFF
                 killService();
                 displayServiceStatus(0);
             } else {
+                setServiceEnabledPref(true); // Save that user wants it ON
                 runService();
                 displayServiceStatus(-1);
             }
@@ -148,11 +154,24 @@ public class MainActivity extends Activity {
     public void onResume() {
         super.onResume();
         if (checkAndRequestPermissions()) {
-            if (!isServiceRunning()) {
+            // FIX: Only auto-start if the user hasn't explicitly stopped it
+            if (!isServiceRunning() && getServiceEnabledPref()) {
                 runService();
             }
             displayServiceStatus(isServiceRunning() ? 1 : 0);
         }
+    }
+
+    // --- Helper methods for persistence ---
+    private void setServiceEnabledPref(boolean enabled) {
+        SharedPreferences prefs = getSharedPreferences("AutoLightPrefs", MODE_PRIVATE);
+        prefs.edit().putBoolean(PREF_ENABLED, enabled).apply();
+    }
+
+    private boolean getServiceEnabledPref() {
+        SharedPreferences prefs = getSharedPreferences("AutoLightPrefs", MODE_PRIVATE);
+        // Default is true so it runs on the very first install
+        return prefs.getBoolean(PREF_ENABLED, true);
     }
 
     private void runService() {
