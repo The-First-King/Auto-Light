@@ -17,7 +17,7 @@ public class LightControl implements SensorEventListener {
     private final ContentResolver cResolver;
     
     private final Handler delayer = new Handler(Looper.getMainLooper());
-    private final long pause = 2500; // Increased slightly for sensor stability
+    private final long pause = 2500; 
 
     private boolean onListen = false;
     private boolean landscape = false;
@@ -50,11 +50,9 @@ public class LightControl implements SensorEventListener {
     private void scheduleSuspend() {
         if (sett.mode == Constants.WORK_MODE_ALWAYS) return;
 
-        // Keep running if orientation matches mode
         if (sett.mode == Constants.WORK_MODE_LANDSCAPE && landscape) return;
         if (sett.mode == Constants.WORK_MODE_PORTRAIT && !landscape) return;
 
-        // Otherwise, stop after a short delay
         delayer.removeCallbacksAndMessages(null);
         delayer.postDelayed(this::stopListening, pause);
     }
@@ -68,7 +66,6 @@ public class LightControl implements SensorEventListener {
         else if (sett.mode == Constants.WORK_MODE_UNLOCK) shouldActivate = true;
 
         if (shouldActivate) {
-            // Cancel any pending "stop" commands first
             delayer.removeCallbacksAndMessages(null);
             
             if (!onListen && lightSensor != null) {
@@ -129,7 +126,6 @@ public class LightControl implements SensorEventListener {
                     Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL);
         } catch (Exception ignored) {}
         
-        onListen = false; 
         startListening();
     }
 
