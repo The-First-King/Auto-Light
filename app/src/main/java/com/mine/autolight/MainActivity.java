@@ -129,9 +129,6 @@ public class MainActivity extends Activity {
             sett.save();
             sendBroadcastToService(Constants.SERVICE_INTENT_PAYLOAD_SET);
         });
-
-        TextView textView = findViewById(R.id.tv_dontkillmyapp);
-        if (textView != null) textView.setMovementMethod(LinkMovementMethod.getInstance());
     }
 
     @Override
