@@ -16,13 +16,13 @@ public class MySettings {
 
 	public void load() {
 		sharedPref = context.getSharedPreferences("mine.autolight", Context.MODE_PRIVATE | Context.MODE_MULTI_PROCESS);
-		l1 = sharedPref.getInt("l1", 10);
+		l1 = sharedPref.getInt("l1", 1);
 		l2 = sharedPref.getInt("l2", 100);
 		l3 = sharedPref.getInt("l3", 1000);
 		l4 = sharedPref.getInt("l4", 10000);
 		b1 = sharedPref.getInt("b1", 1);
-		b2 = sharedPref.getInt("b2", 30);
-		b3 = sharedPref.getInt("b3", 60);
+		b2 = sharedPref.getInt("b2", 10);
+		b3 = sharedPref.getInt("b3", 30);
 		b4 = sharedPref.getInt("b4", 90);
 		mode = sharedPref.getInt("mode", Constants.WORK_MODE_ALWAYS);
 	}
