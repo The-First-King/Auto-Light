@@ -6,10 +6,6 @@ import android.content.Intent;
 import android.os.Build;
 import android.util.Log;
 
-/**
- * Receiver to catch the system BOOT_COMPLETED broadcast.
- * This allows the app to restart the LightService automatically after a device reboot.
- */
 public class AutoStart extends BroadcastReceiver {
     private static final String TAG = "AutoStartReceiver";
 
