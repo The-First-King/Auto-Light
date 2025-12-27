@@ -38,7 +38,6 @@ public class MainActivity extends Activity {
 
         sett = new MySettings(this);
 
-        // --- Collapsible Settings Logic ---
         Button btnExpand = findViewById(R.id.btn_expand);
         LinearLayout llHidden = findViewById(R.id.ll_hidden_settings);
         llHidden.setVisibility(View.GONE);
@@ -57,7 +56,6 @@ public class MainActivity extends Activity {
             }
         });
 
-        // --- Service Control Logic ---
         tvState = findViewById(R.id.tv_service_state);
         btnStart = findViewById(R.id.btn_start_stop);
         btnStart.setOnClickListener(arg0 -> {
@@ -72,14 +70,12 @@ public class MainActivity extends Activity {
             }
         });
 
-        // --- Status Check Logic ---
         Button btnState = findViewById(R.id.btn_get_state);
         btnState.setOnClickListener(arg0 -> {
             displayServiceStatus(isServiceRunning() ? 1 : 0);
             sendBroadcastToService(Constants.SERVICE_INTENT_PAYLOAD_PING);
         });
 
-        // --- Settings Input Logic ---
         etSensor1 = findViewById(R.id.et_sensor_value_1);
         etSensor2 = findViewById(R.id.et_sensor_value_2);
         etSensor3 = findViewById(R.id.et_sensor_value_3);
@@ -112,7 +108,6 @@ public class MainActivity extends Activity {
             }
         });
 
-        // --- Work Mode Radio Logic ---
         RadioButton rbWAlways = findViewById(R.id.rb_work_always);
         RadioButton rbWPortrait = findViewById(R.id.rb_work_portrait);
         RadioButton rbWLandscape = findViewById(R.id.rb_work_landscape);
@@ -162,7 +157,6 @@ public class MainActivity extends Activity {
         }
     }
 
-    // --- Helper methods for persistence ---
     private void setServiceEnabledPref(boolean enabled) {
         SharedPreferences prefs = getSharedPreferences("AutoLightPrefs", MODE_PRIVATE);
         prefs.edit().putBoolean(PREF_ENABLED, enabled).apply();
@@ -170,7 +164,6 @@ public class MainActivity extends Activity {
 
     private boolean getServiceEnabledPref() {
         SharedPreferences prefs = getSharedPreferences("AutoLightPrefs", MODE_PRIVATE);
-        // Default is true so it runs on the very first install
         return prefs.getBoolean(PREF_ENABLED, true);
     }
 
