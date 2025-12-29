@@ -53,14 +53,18 @@ public class LightControl implements SensorEventListener {
                 buffer.removeFirst();
             }
 
-            // Trigger instant update if flag is set OR in UNLOCK mode
+            // If we are in "Immediate" mode (Unlock/Rotate/Screen-On)
             if (needsImmediateUpdate || sett.mode == Constants.WORK_MODE_UNLOCK) {
                 lux = rawLux;
                 setBrightness((int) lux);
-                needsImmediateUpdate = false; 
                 
+                // IMPORTANT: If it's a one-shot mode, stop after the first valid reading
                 if (sett.mode == Constants.WORK_MODE_UNLOCK) {
+                    needsImmediateUpdate = false;
                     stopListening();
+                } else if (needsImmediateUpdate) {
+                    // This handles the Screen-On snap for continuous modes
+                    needsImmediateUpdate = false; 
                 }
             } else {
                 processSmoothedLux();
@@ -91,25 +95,22 @@ public class LightControl implements SensorEventListener {
         lastAppliedLux = luxVal;
     }
 
-    // Called by Service when SCREEN_OFF is detected
     public void prepareForScreenOn() {
         needsImmediateUpdate = true;
         lastAppliedLux = -1;
         buffer.clear();
-        // Start listening so we are ready for the first photon on wake
         startListening(); 
     }
 
     private void scheduleSuspend() {
+        // ALWAYS mode never suspends
         if (sett.mode == Constants.WORK_MODE_ALWAYS) return;
         
-        // If we are just doing a one-shot update for Screen On, 
-        // we must allow it to suspend after the 'pause' delay.
-        if (!needsImmediateUpdate) {
-            if (sett.mode == Constants.WORK_MODE_LANDSCAPE && landscape) return;
-            if (sett.mode == Constants.WORK_MODE_PORTRAIT && !landscape) return;
-        }
+        // Portrait/Landscape modes stay active as long as orientation matches
+        if (sett.mode == Constants.WORK_MODE_PORTRAIT && !landscape) return;
+        if (sett.mode == Constants.WORK_MODE_LANDSCAPE && landscape) return;
 
+        // Otherwise (Unlock mode or wrong orientation), stop after the delay
         delayer.removeCallbacksAndMessages(null);
         delayer.postDelayed(this::stopListening, pause);
     }
@@ -117,15 +118,25 @@ public class LightControl implements SensorEventListener {
     public void startListening() {
         boolean shouldActivate = false;
 
-        if (needsImmediateUpdate) shouldActivate = true;
-        else if (sett.mode == Constants.WORK_MODE_ALWAYS) shouldActivate = true;
-        else if (sett.mode == Constants.WORK_MODE_LANDSCAPE && landscape) shouldActivate = true;
-        else if (sett.mode == Constants.WORK_MODE_PORTRAIT && !landscape) shouldActivate = true;
-        else if (sett.mode == Constants.WORK_MODE_UNLOCK) shouldActivate = true;
+        if (sett.mode == Constants.WORK_MODE_ALWAYS) {
+            shouldActivate = true;
+        } else if (sett.mode == Constants.WORK_MODE_LANDSCAPE) {
+            shouldActivate = landscape || needsImmediateUpdate;
+        } else if (sett.mode == Constants.WORK_MODE_PORTRAIT) {
+            shouldActivate = !landscape || needsImmediateUpdate;
+        } else if (sett.mode == Constants.WORK_MODE_UNLOCK) {
+            // This enables the "one-shot" behavior for Screen-On and Rotation
+            shouldActivate = true; 
+        }
 
         if (shouldActivate) {
             delayer.removeCallbacksAndMessages(null);
             if (!onListen && lightSensor != null) {
+                // Clear state for a fresh start
+                if (sett.mode == Constants.WORK_MODE_UNLOCK || needsImmediateUpdate) {
+                    lastAppliedLux = -1;
+                    buffer.clear();
+                }
                 sMgr.registerListener(this, lightSensor, SensorManager.SENSOR_DELAY_NORMAL);
                 onListen = true;
             }
@@ -141,7 +152,6 @@ public class LightControl implements SensorEventListener {
             onListen = false;
         }
         delayer.removeCallbacksAndMessages(null);
-        // We do NOT clear needsImmediateUpdate here so the flag survives until the first sensor hit
     }
 
     private void setBrightness(int luxValue) {
