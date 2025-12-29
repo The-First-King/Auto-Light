@@ -12,6 +12,7 @@ import android.content.pm.ServiceInfo;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.os.IBinder;
+import android.widget.Toast;
 
 public class LightService extends Service {
     public static boolean isRunning = false;
@@ -27,20 +28,46 @@ public class LightService extends Service {
             String action = intent.getAction();
             if (action == null) return;
 
+            // 1. Always keep the orientation state synced
+            boolean isLandscape = getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
+            lightControl.setLandscape(isLandscape);
+
+            // 2. Handle Custom App Intents (Ping/Set)
+            if (Constants.SERVICE_INTENT_ACTION.equals(action)) {
+                int payload = intent.getIntExtra(Constants.SERVICE_INTENT_EXTRA, -1);
+                if (payload == Constants.SERVICE_INTENT_PAYLOAD_PING) {
+                    String status = "Lux: " + lightControl.getLastSensorValue() + 
+                                    " | Brightness: " + lightControl.getSetBrightness();
+                    Toast.makeText(context, status, Toast.LENGTH_SHORT).show();
+                } else if (payload == Constants.SERVICE_INTENT_PAYLOAD_SET) {
+                    lightControl.reconfigure();
+                }
+                return;
+            }
+
+            // 3. Handle System Events
             if (Intent.ACTION_SCREEN_OFF.equals(action)) {
-                // Screen is off: Arm the controller for an instant update on wake
+                // Prepare for next wake-up
                 lightControl.prepareForScreenOn();
             } 
             else if (Intent.ACTION_USER_PRESENT.equals(action) || Intent.ACTION_SCREEN_ON.equals(action)) {
-                // Screen is back: Ensure listening starts (prepareForScreenOn likely already started it)
-                lightControl.startListening();
+                // For "Unlock" mode, we want the one-shot logic. 
+                // For other modes, startListening() handles the persistence logic.
+                if (settings.mode == Constants.WORK_MODE_UNLOCK) {
+                    lightControl.onScreenUnlock();
+                } else {
+                    lightControl.startListening();
+                }
             }
             else if (Intent.ACTION_CONFIGURATION_CHANGED.equals(action)) {
-                boolean isLandscape = getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
-                lightControl.setLandscape(isLandscape);
-                lightControl.startListening();
+                // CRITICAL: If in Unlock/Rotate mode, treat rotation like a screen-on event
+                if (settings.mode == Constants.WORK_MODE_UNLOCK) {
+                    lightControl.onScreenUnlock();
+                } else {
+                    // For Always, Portrait, or Landscape modes, check if we should still be running
+                    lightControl.startListening();
+                }
             }
-            // ... (Ping/Set payload logic remains same)
         }
     };
 
@@ -85,6 +112,10 @@ public class LightService extends Service {
             startForeground(NOTIFICATION_ID, notification);
         }
 
+        // Initialize orientation and start if necessary
+        boolean isLandscape = getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
+        lightControl.setLandscape(isLandscape);
+
         if (settings.mode == Constants.WORK_MODE_ALWAYS) {
             lightControl.startListening();
         }
@@ -103,7 +134,7 @@ public class LightService extends Service {
     @Override
     public void onDestroy() {
         isRunning = false;
-        lightControl.stopListening();
+        if (lightControl != null) lightControl.stopListening();
         unregisterReceiver(eventReceiver);
         super.onDestroy();
     }
