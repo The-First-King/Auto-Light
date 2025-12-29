@@ -29,9 +29,9 @@ public class LightControl implements SensorEventListener {
 
     // --- Smoothing Variables ---
     private final LinkedList<SensorReading> buffer = new LinkedList<>();
-    private final long WINDOW_MS = 2000; // 2 second smoothing window
+    private final long WINDOW_MS = 3000; // 2 second smoothing window
     private float lastAppliedLux = -1; 
-    private final float HYSTERESIS_THRESHOLD = 0.10f; // 10% change required
+    private final float HYSTERESIS_THRESHOLD = 0.15f; // 10% change required
 
     LightControl(Context context) {
         sett = new MySettings(context);
