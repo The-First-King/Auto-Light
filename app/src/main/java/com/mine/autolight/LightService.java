@@ -26,13 +26,28 @@ public class LightService extends Service {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            if (action == null) return;
+            if (action == null || lightControl == null) return;
 
-            // Update landscape state immediately on any event
+            // 1. Sync orientation state
             boolean isLandscape = getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
             lightControl.setLandscape(isLandscape);
 
-            if (Constants.SERVICE_INTENT_ACTION.equals(action)) {
+            // 2. Handle System Triggers (Screen On / Unlock)
+            // Use .equals(action) on the constant to avoid NullPointer issues
+            if (Intent.ACTION_SCREEN_ON.equals(action) || Intent.ACTION_USER_PRESENT.equals(action)) {
+                // If mode is UNLOCK, we trigger the sensor logic
+                if (settings.mode == Constants.WORK_MODE_UNLOCK) {
+                    lightControl.onScreenUnlock();
+                }
+            } 
+            
+            // 3. Handle Orientation Changes
+            else if (Intent.ACTION_CONFIGURATION_CHANGED.equals(action)) {
+                lightControl.startListening();
+            }
+
+            // 4. Handle Custom App Intents (Ping/Set)
+            else if (Constants.SERVICE_INTENT_ACTION.equals(action)) {
                 int payload = intent.getIntExtra(Constants.SERVICE_INTENT_EXTRA, -1);
                 if (payload == Constants.SERVICE_INTENT_PAYLOAD_PING) {
                     String status = "Lux: " + lightControl.getLastSensorValue() + 
@@ -41,17 +56,6 @@ public class LightService extends Service {
                 } else if (payload == Constants.SERVICE_INTENT_PAYLOAD_SET) {
                     lightControl.reconfigure();
                 }
-                return;
-            }
-
-            // Check for Unlock OR Screen On
-            if (Intent.ACTION_USER_PRESENT.equals(action) || Intent.ACTION_SCREEN_ON.equals(action)) {
-                if (settings.mode == Constants.WORK_MODE_UNLOCK) {
-                    lightControl.onScreenUnlock();
-                }
-            } else if (Intent.ACTION_CONFIGURATION_CHANGED.equals(action)) {
-                // Re-evaluate listening state based on new orientation
-                lightControl.startListening();
             }
         }
     };
@@ -60,14 +64,20 @@ public class LightService extends Service {
     public void onCreate() {
         super.onCreate();
         isRunning = true;
+        
+        // Initialize logic classes FIRST
         settings = new MySettings(this);
         lightControl = new LightControl(this);
 
+        // Define filter and register
         IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_SCREEN_ON);
+        filter.addAction(Intent.ACTION_SCREEN_OFF); // Added for completeness
         filter.addAction(Intent.ACTION_USER_PRESENT);
-        filter.addAction(Intent.ACTION_SCREEN_ON); 
         filter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
         filter.addAction(Constants.SERVICE_INTENT_ACTION);
+        
+        // Use a high priority to ensure we get the broadcast quickly
         filter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
         
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -97,7 +107,7 @@ public class LightService extends Service {
             startForeground(NOTIFICATION_ID, notification);
         }
 
-        // Initialize orientation state on start
+        // Initialize state
         boolean isLandscape = getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
         lightControl.setLandscape(isLandscape);
 
@@ -120,7 +130,7 @@ public class LightService extends Service {
     @Override
     public void onDestroy() {
         isRunning = false;
-        lightControl.stopListening();
+        if (lightControl != null) lightControl.stopListening();
         unregisterReceiver(eventReceiver);
         super.onDestroy();
     }
