@@ -28,11 +28,9 @@ public class LightService extends Service {
             String action = intent.getAction();
             if (action == null) return;
 
-            // 1. Always keep the orientation state synced
             boolean isLandscape = getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
             lightControl.setLandscape(isLandscape);
 
-            // 2. Handle Custom App Intents (Ping/Set)
             if (Constants.SERVICE_INTENT_ACTION.equals(action)) {
                 int payload = intent.getIntExtra(Constants.SERVICE_INTENT_EXTRA, -1);
                 if (payload == Constants.SERVICE_INTENT_PAYLOAD_PING) {
@@ -45,14 +43,10 @@ public class LightService extends Service {
                 return;
             }
 
-            // 3. Handle System Events
             if (Intent.ACTION_SCREEN_OFF.equals(action)) {
-                // Prepare for next wake-up
                 lightControl.prepareForScreenOn();
             } 
             else if (Intent.ACTION_USER_PRESENT.equals(action) || Intent.ACTION_SCREEN_ON.equals(action)) {
-                // For "Unlock" mode, we want the one-shot logic. 
-                // For other modes, startListening() handles the persistence logic.
                 if (settings.mode == Constants.WORK_MODE_UNLOCK) {
                     lightControl.onScreenUnlock();
                 } else {
@@ -60,11 +54,9 @@ public class LightService extends Service {
                 }
             }
             else if (Intent.ACTION_CONFIGURATION_CHANGED.equals(action)) {
-                // CRITICAL: If in Unlock/Rotate mode, treat rotation like a screen-on event
                 if (settings.mode == Constants.WORK_MODE_UNLOCK) {
                     lightControl.onScreenUnlock();
                 } else {
-                    // For Always, Portrait, or Landscape modes, check if we should still be running
                     lightControl.startListening();
                 }
             }
@@ -112,7 +104,6 @@ public class LightService extends Service {
             startForeground(NOTIFICATION_ID, notification);
         }
 
-        // Initialize orientation and start if necessary
         boolean isLandscape = getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
         lightControl.setLandscape(isLandscape);
 
