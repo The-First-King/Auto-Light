@@ -29,9 +29,9 @@ public class LightControl implements SensorEventListener {
 
     // --- Smoothing Variables ---
     private final LinkedList<SensorReading> buffer = new LinkedList<>();
-    private final long WINDOW_MS = 3000; // 2 second smoothing window
-    private float lastAppliedLux = -1; 
-    private final float HYSTERESIS_THRESHOLD = 0.15f; // 10% change required
+    private final long WINDOW_MS = 3000;              // 3 second smoothing window
+    private final float HYSTERESIS_THRESHOLD = 0.15f; // 15% change required to update
+    private float lastAppliedLux = -1;                // Track the currently set lux level
 
     LightControl(Context context) {
         sett = new MySettings(context);
@@ -49,42 +49,43 @@ public class LightControl implements SensorEventListener {
             float rawLux = event.values[0];
             long now = System.currentTimeMillis();
 
-            // 1. Add to buffer
+            // 1. Add current reading to buffer
             buffer.addLast(new SensorReading(now, rawLux));
             
-            // 2. Prune old data
+            // 2. Prune data older than the WINDOW_MS
             while (!buffer.isEmpty() && (now - buffer.getFirst().time) > WINDOW_MS) {
                 buffer.removeFirst();
             }
 
-            // 3. Handle Work Modes & Logic
+            // 3. Handle Work Modes
             if (sett.mode == Constants.WORK_MODE_UNLOCK) {
-                // For "Unlock" mode, we want immediate action, no smoothing.
+                // For "Unlock" mode, we want immediate action, skipping smoothing.
                 lux = rawLux;
                 setBrightness((int) lux);
                 stopListening();
             } else {
-                // For "Always" or Orientation modes, use Smoothing + Hysteresis
-                processSmoothedLux(now);
+                // For "Always" or Orientation modes, apply Smoothing + Hysteresis
+                processSmoothedLux();
             }
         }
     }
 
-    private void processSmoothedLux(long now) {
-        // If it's the very first reading after starting, apply immediately
-        if (lastAppliedLux == -1) {
+    private void processSmoothedLux() {
+        // Fast Start: If this is the first reading since start/unlock, apply immediately
+        if (lastAppliedLux == -1 && !buffer.isEmpty()) {
             lux = buffer.getLast().value;
             applyAndRecord(lux);
             return;
         }
 
-        // Calculate average of the 2-second window
+        // Calculate Average of the buffer
         float sum = 0;
         for (SensorReading r : buffer) sum += r.value;
         float averageLux = sum / buffer.size();
 
-        // Hysteresis: Only update if change is > 10%
+        // Hysteresis Gate: Check if the change is significant enough to act
         float diff = Math.abs(averageLux - lastAppliedLux);
+        // Requirement: > 15% change OR > 5 lux difference (to handle very low light shifts)
         if (diff > (lastAppliedLux * HYSTERESIS_THRESHOLD) || diff > 5) {
             lux = averageLux;
             applyAndRecord(lux);
@@ -117,7 +118,7 @@ public class LightControl implements SensorEventListener {
             delayer.removeCallbacksAndMessages(null);
             
             if (!onListen && lightSensor != null) {
-                // Reset smoothing state on every fresh start
+                // Ensure state is clean for a fresh listener start
                 buffer.clear();
                 lastAppliedLux = -1;
                 
@@ -134,12 +135,12 @@ public class LightControl implements SensorEventListener {
             onListen = false;
         }
         delayer.removeCallbacksAndMessages(null);
-        buffer.clear(); // Clear buffer to stay memory efficient
+        buffer.clear();
     }
 
     private void setBrightness(int luxValue) {
         int brightness;
-        // --- YOUR ORIGINAL LOGIC PRESERVED EXACTLY ---
+        // Logic using Custom Curves from MySettings.java file
         if (luxValue <= sett.l1) brightness = sett.b1;
         else if (luxValue >= sett.l4) brightness = sett.b4;
         else {
@@ -164,8 +165,6 @@ public class LightControl implements SensorEventListener {
         } catch (Exception ignored) {}
     }
 
-    // ... Remaining helper methods (reconfigure, setLandscape, etc.) stay the same ...
-    
     public void reconfigure() {
         stopListening();
         sett.load();
@@ -176,11 +175,18 @@ public class LightControl implements SensorEventListener {
         this.landscape = land;
     }
 
+    /**
+     * Called when the screen turns on or the user unlocks the device.
+     */
     public void onScreenUnlock() {
         try {
             Settings.System.putInt(cResolver, Settings.System.SCREEN_BRIGHTNESS_MODE,
                     Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL);
         } catch (Exception ignored) {}
+        
+        // Reset smoothing state to ensure the first reading after screen-on is instant
+        lastAppliedLux = -1;
+        buffer.clear();
         
         onListen = false; 
         startListening();
@@ -189,7 +195,6 @@ public class LightControl implements SensorEventListener {
     public int getLastSensorValue() { return (int) lux; }
     public int getSetBrightness() { return tempBrightness; }
 
-    // Inner class for buffer tracking
     private static class SensorReading {
         long time;
         float value;
