@@ -53,17 +53,14 @@ public class LightControl implements SensorEventListener {
                 buffer.removeFirst();
             }
 
-            // If we are in "Immediate" mode (Unlock/Rotate/Screen-On)
             if (needsImmediateUpdate || sett.mode == Constants.WORK_MODE_UNLOCK) {
                 lux = rawLux;
                 setBrightness((int) lux);
                 
-                // IMPORTANT: If it's a one-shot mode, stop after the first valid reading
                 if (sett.mode == Constants.WORK_MODE_UNLOCK) {
                     needsImmediateUpdate = false;
                     stopListening();
                 } else if (needsImmediateUpdate) {
-                    // This handles the Screen-On snap for continuous modes
                     needsImmediateUpdate = false; 
                 }
             } else {
@@ -103,14 +100,10 @@ public class LightControl implements SensorEventListener {
     }
 
     private void scheduleSuspend() {
-        // ALWAYS mode never suspends
         if (sett.mode == Constants.WORK_MODE_ALWAYS) return;
-        
-        // Portrait/Landscape modes stay active as long as orientation matches
         if (sett.mode == Constants.WORK_MODE_PORTRAIT && !landscape) return;
         if (sett.mode == Constants.WORK_MODE_LANDSCAPE && landscape) return;
 
-        // Otherwise (Unlock mode or wrong orientation), stop after the delay
         delayer.removeCallbacksAndMessages(null);
         delayer.postDelayed(this::stopListening, pause);
     }
@@ -125,14 +118,12 @@ public class LightControl implements SensorEventListener {
         } else if (sett.mode == Constants.WORK_MODE_PORTRAIT) {
             shouldActivate = !landscape || needsImmediateUpdate;
         } else if (sett.mode == Constants.WORK_MODE_UNLOCK) {
-            // This enables the "one-shot" behavior for Screen-On and Rotation
             shouldActivate = true; 
         }
 
         if (shouldActivate) {
             delayer.removeCallbacksAndMessages(null);
             if (!onListen && lightSensor != null) {
-                // Clear state for a fresh start
                 if (sett.mode == Constants.WORK_MODE_UNLOCK || needsImmediateUpdate) {
                     lastAppliedLux = -1;
                     buffer.clear();
