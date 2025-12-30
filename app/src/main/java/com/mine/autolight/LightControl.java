@@ -222,7 +222,7 @@ public class LightControl implements SensorEventListener {
 
     public int getSetBrightness() { return tempBrightness; }
 
-    private    private static class SensorReading {
+    private static class SensorReading {
         final long time;
         final float value;
 
