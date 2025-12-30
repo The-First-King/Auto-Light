@@ -227,3 +227,4 @@ public class LightControl implements SensorEventListener {
     public int getSetBrightness() {
         return tempBrightness;
     }
+}

@@ -253,3 +253,4 @@ public class MainActivity extends Activity {
         etBrightness3.setText(String.valueOf(sett.b3));
         etBrightness4.setText(String.valueOf(sett.b4));
     }
+}
