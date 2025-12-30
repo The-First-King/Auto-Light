@@ -154,8 +154,9 @@ public class LightService extends Service {
         super.onDestroy();
     }
 
-    @Override
-    public IBinder onBind    public IBinder onBind(Intent intent) {
-        return null;
-    }
+    
+	@Override
+	public IBinder onBind(Intent intent) {
+		return null;
+	}
 }
