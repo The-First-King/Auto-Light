@@ -31,7 +31,8 @@ public class LightService extends Service {
             String action = intent.getAction();
             if (action == null) return;
 
-            boolean isLandscape = getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
+            boolean isLandscape =
+                    getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
             lightControl.setLandscape(isLandscape);
 
             if (Intent.ACTION_SCREEN_OFF.equals(action)) {
@@ -90,7 +91,7 @@ public class LightService extends Service {
         IntentFilter cmd = new IntentFilter(Constants.SERVICE_INTENT_ACTION);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            // System broadcasts originate from the system
+            // System broadcasts originate from system
             registerReceiver(systemReceiver, sys, Context.RECEIVER_EXPORTED);
 
             // Internal commands should not be exported
@@ -124,8 +125,8 @@ public class LightService extends Service {
             startForeground(NOTIFICATION_ID, notification);
         }
 
-        boolean isLandscape = getResources().getConfiguration().orientation
-                == Configuration.ORIENTATION_LANDSCAPE;
+        boolean isLandscape =
+                getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
         lightControl.setLandscape(isLandscape);
 
         if (settings.mode == Constants.WORK_MODE_ALWAYS) {
@@ -153,7 +154,7 @@ public class LightService extends Service {
         }
 
         try { unregisterReceiver(systemReceiver); } catch (Exception ignored) { }
-        try        try { unregisterReceiver(commandReceiver); } catch (Exception ignored) { }
+        try { unregisterReceiver(commandReceiver); } catch (Exception ignored) { }
 
         super.onDestroy();
     }
@@ -162,3 +163,4 @@ public class LightService extends Service {
     public IBinder onBind(Intent intent) {
         return null;
     }
+}

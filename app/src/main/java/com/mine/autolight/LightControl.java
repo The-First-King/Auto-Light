@@ -28,13 +28,12 @@ public class LightControl implements SensorEventListener {
     private float lux = 0;
     private int tempBrightness = 0;
 
-    // --- Hysteresis settings (preserved) ---
-    private static final float HYSTERESIS_THRESHOLD = 0.15f; // 15% of last applied
-    private static final float MIN_ABS_LUX_DELTA = 5f;       // absolute minimum threshold
+    // Hysteresis (preserved)
+    private static final float HYSTERESIS_THRESHOLD = 0.15f;
+    private static final float MIN_ABS_LUX_DELTA = 5f;
 
-    // --- EMA smoothing ---
+    // EMA
     private static final long EMA_TAU_MS = 2500;
-
     private boolean hasEma = false;
     private float emaLux = 0f;
     private long lastEmaTimeMs = 0L;
@@ -49,7 +48,7 @@ public class LightControl implements SensorEventListener {
     }
 
     @Override
-    public void onAccuracyChanged(Sensor arg0, int arg1) { }
+    public void onAccuracyChanged(Sensor sensor, int accuracy) { }
 
     @Override
     public void onSensorChanged(SensorEvent event) {
@@ -58,31 +57,28 @@ public class LightControl implements SensorEventListener {
         float rawLux = event.values[0];
         long now = SystemClock.elapsedRealtime();
 
-        // Preserve: immediate updates (screen-on preparation) and unlock mode
+        // Immediate update path (screen-on prep) + Unlock mode path
         if (needsImmediateUpdate || sett.mode == Constants.WORK_MODE_UNLOCK) {
             lux = rawLux;
             setBrightness((int) lux);
 
-            // Keep smoothing state consistent to avoid jumps when switching back
+            // Sync smoothing state so we don't jump when continuing
             hasEma = true;
             emaLux = rawLux;
             lastEmaTimeMs = now;
             lastAppliedLux = rawLux;
 
             if (sett.mode == Constants.WORK_MODE_UNLOCK) {
-                // Preserve: Unlock mode applies once then stops listening
                 needsImmediateUpdate = false;
-                stopListening();
+                stopListening(); // unlock applies once then stops listening
             } else {
-                // Consume the immediate-update flag
                 needsImmediateUpdate = false;
             }
             return;
         }
 
-        // Continuous modes: EMA smoothing + hysteresis gate
+        // Continuous modes: EMA + hysteresis gate
         float smoothed = updateEma(now, rawLux);
-
         if (shouldApply(smoothed)) {
             lux = smoothed;
             setBrightness((int) lux);
@@ -108,7 +104,6 @@ public class LightControl implements SensorEventListener {
         long dt = nowMs - lastEmaTimeMs;
         if (dt <= 0) return emaLux;
 
-        // alpha = 1 - exp(-dt/tau)
         float alpha = 1f - (float) Math.exp(-(double) dt / (double) EMA_TAU_MS);
         emaLux = emaLux + alpha * (rawLux - emaLux);
         lastEmaTimeMs = nowMs;
@@ -117,10 +112,9 @@ public class LightControl implements SensorEventListener {
     }
 
     private boolean shouldApply(float smoothedLux) {
-        if (lastAppliedLux < 0) return true; // first apply
+        if (lastAppliedLux < 0) return true;
         float diff = Math.abs(smoothedLux - lastAppliedLux);
-        float rel = lastAppliedLux * HYSTERESIS_THRESHOLD;
-        float threshold = Math.max(rel, MIN_ABS_LUX_DELTA);
+        float threshold = Math.max(lastAppliedLux * HYSTERESIS_THRESHOLD, MIN_ABS_LUX_DELTA);
         return diff > threshold;
     }
 
@@ -148,7 +142,7 @@ public class LightControl implements SensorEventListener {
             shouldActivate = landscape || needsImmediateUpdate;
         } else if (sett.mode == Constants.WORK_MODE_PORTRAIT) {
             shouldActivate = !landscape || needsImmediateUpdate;
-        } else { // WORK_MODE_UNLOCK
+        } else { // UNLOCK
             shouldActivate = true;
         }
 
@@ -156,11 +150,9 @@ public class LightControl implements SensorEventListener {
             delayer.removeCallbacksAndMessages(null);
 
             if (!onListen && lightSensor != null) {
-                // Preserve "fresh" smoothing when waking / immediate update
                 if (sett.mode == Constants.WORK_MODE_UNLOCK || needsImmediateUpdate) {
                     resetSmoothing(SystemClock.elapsedRealtime());
                 }
-
                 sMgr.registerListener(this, lightSensor, SensorManager.SENSOR_DELAY_NORMAL);
                 onListen = true;
             }
@@ -214,21 +206,19 @@ public class LightControl implements SensorEventListener {
     }
 
     public void setLandscape(boolean land) {
-        this.landscape = land;
+        landscape = land;
     }
 
     public void onScreenUnlock() {
         try {
-            Settings.System.putInt(
-                    cResolver,
+            Settings.System.putInt(cResolver,
                     Settings.System.SCREEN_BRIGHTNESS_MODE,
-                    Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL
-            );
-               } catch (Exception ignored) { }
+                    Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL);
+        } catch (Exception ignored) { }
 
         needsImmediateUpdate = true;
         startListening();
-    }
+       }
 
     public int getLastSensorValue() {
         return (int) lux;

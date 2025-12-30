@@ -41,7 +41,7 @@ public class MainActivity extends Activity {
         LinearLayout llHidden = findViewById(R.id.ll_hidden_settings);
         llHidden.setVisibility(View.GONE);
 
-        btnExpand.setOnClickListener(arg0 -> {
+        btnExpand.setOnClickListener(v -> {
             if (isExpanded) {
                 llHidden.setVisibility(View.GONE);
                 btnExpand.setText(R.string.show_config);
@@ -58,7 +58,7 @@ public class MainActivity extends Activity {
         tvState = findViewById(R.id.tv_service_state);
 
         btnStart = findViewById(R.id.btn_start_stop);
-        btnStart.setOnClickListener(arg0 -> {
+        btnStart.setOnClickListener(v -> {
             if (isServiceRunning()) {
                 setServiceEnabledPref(false);
                 killService();
@@ -71,7 +71,7 @@ public class MainActivity extends Activity {
         });
 
         Button btnState = findViewById(R.id.btn_get_state);
-        btnState.setOnClickListener(arg0 -> {
+        btnState.setOnClickListener(v -> {
             displayServiceStatus(isServiceRunning() ? 1 : 0);
             sendBroadcastToService(Constants.SERVICE_INTENT_PAYLOAD_PING);
         });
@@ -89,7 +89,7 @@ public class MainActivity extends Activity {
         refillCollapsibleSettings();
 
         Button btnSave = findViewById(R.id.btn_save_settings);
-        btnSave.setOnClickListener(arg0 -> {
+        btnSave.setOnClickListener(v -> {
             try {
                 sett.l1 = Integer.parseInt(etSensor1.getText().toString());
                 sett.l2 = Integer.parseInt(etSensor2.getText().toString());
@@ -103,7 +103,6 @@ public class MainActivity extends Activity {
 
                 sett.save();
                 sendBroadcastToService(Constants.SERVICE_INTENT_PAYLOAD_SET);
-
                 Toast.makeText(this, "Settings saved", Toast.LENGTH_SHORT).show();
             } catch (NumberFormatException e) {
                 Toast.makeText(this, "Invalid input", Toast.LENGTH_SHORT).show();
@@ -121,7 +120,7 @@ public class MainActivity extends Activity {
         if (sett.mode == Constants.WORK_MODE_UNLOCK) rbWUnlock.setChecked(true);
 
         RadioGroup rgWorkMode = findViewById(R.id.rg_work_mode);
-        rgWorkMode.setOnCheckedChangeListener((radioGroup, checkedId) -> {
+        rgWorkMode.setOnCheckedChangeListener((group, checkedId) -> {
             if (checkedId == R.id.rb_work_always) sett.mode = Constants.WORK_MODE_ALWAYS;
             if (checkedId == R.id.rb_work_portrait) sett.mode = Constants.WORK_MODE_PORTRAIT;
             if (checkedId == R.id.rb_work_landscape) sett.mode = Constants.WORK_MODE_LANDSCAPE;
@@ -150,7 +149,6 @@ public class MainActivity extends Activity {
     @Override
     public void onResume() {
         super.onResume();
-
         if (checkAndRequestPermissions()) {
             if (!isServiceRunning() && getServiceEnabledPref()) {
                 runService();
@@ -171,11 +169,8 @@ public class MainActivity extends Activity {
 
     private void runService() {
         Intent serviceIntent = new Intent(this, LightService.class);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            startForegroundService(serviceIntent);
-        } else {
-            startService(serviceIntent);
-        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) startForegroundService(serviceIntent);
+        else startService(serviceIntent);
     }
 
     private void killService() {
@@ -186,6 +181,7 @@ public class MainActivity extends Activity {
         return LightService.isRunning;
     }
 
+    // Best-practice: explicit broadcast to our app (mitigates implicit interception risk)
     private void sendBroadcastToService(int payload) {
         Intent i = new Intent(Constants.SERVICE_INTENT_ACTION);
         i.setPackage(getPackageName());
