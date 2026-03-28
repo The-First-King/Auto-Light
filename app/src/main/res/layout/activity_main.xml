@@ -80,7 +80,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="1 &gt;"
+                        android:text="1 >"
                         tools:ignore="HardcodedText" />
 
                     <TextView
@@ -122,7 +122,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="2 &gt;"
+                        android:text="2 >"
                         tools:ignore="HardcodedText" />
 
                     <TextView
@@ -164,7 +164,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="3 &gt;"
+                        android:text="3 >"
                         tools:ignore="HardcodedText" />
 
                     <TextView
@@ -206,7 +206,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="4 &gt;"
+                        android:text="4 >"
                         tools:ignore="HardcodedText" />
 
                     <TextView
@@ -240,18 +240,99 @@
                         android:text="" />
                 </LinearLayout>
 
-				<LinearLayout
-					android:layout_width="fill_parent" 
-					android:layout_height="wrap_content"
-					android:orientation="horizontal"
-					android:gravity="center_horizontal">
-					
-					<Button
-						android:id="@+id/btn_save_settings"
-						android:layout_width="wrap_content"
-						android:layout_height="wrap_content"
-						android:text="@string/save_settings" />
-				</LinearLayout>
+                <TextView
+                    android:id="@+id/tv_hysteresis_title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/hysteresis_title"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:paddingTop="12dp"
+                    android:paddingBottom="4dp" />
+
+                <TextView
+                    android:id="@+id/tv_hysteresis_help"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/hysteresis_help"
+                    android:textSize="12sp"
+                    android:paddingBottom="8dp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:paddingTop="4dp"
+                    android:paddingBottom="4dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/up_threshold_label" />
+
+                    <EditText
+                        android:id="@+id/et_up_threshold"
+                        android:layout_width="96dp"
+                        android:layout_height="wrap_content"
+                        android:inputType="number"
+                        android:hint="@string/up_threshold_hint" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:paddingTop="4dp"
+                    android:paddingBottom="4dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/down_threshold_label" />
+
+                    <EditText
+                        android:id="@+id/et_down_threshold"
+                        android:layout_width="96dp"
+                        android:layout_height="wrap_content"
+                        android:inputType="number"
+                        android:hint="@string/down_threshold_hint" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:paddingTop="4dp"
+                    android:paddingBottom="4dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/dim_debounce_label" />
+
+                    <EditText
+                        android:id="@+id/et_dim_debounce_ms"
+                        android:layout_width="96dp"
+                        android:layout_height="wrap_content"
+                        android:inputType="number"
+                        android:hint="@string/dim_debounce_hint" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_horizontal">
+
+                    <Button
+                        android:id="@+id/btn_save_settings"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/save_settings" />
+                </LinearLayout>
 
                 <View
                     android:layout_width="fill_parent"
