@@ -127,8 +127,6 @@ public class LightControl implements SensorEventListener {
 
         buffer.clear();
         rollingSum = 0f;
-
-        startListening();
     }
 
     private void scheduleSuspend() {
