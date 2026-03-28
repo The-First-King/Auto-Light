@@ -57,6 +57,21 @@ public class LightControl implements SensorEventListener {
         float rawLux = event.values[0];
         long now = SystemClock.elapsedRealtime();
 
+		if (lastAppliedLux != -1f && !needsImmediateUpdate) {
+			float gap = Math.abs(rawLux - lastAppliedLux);
+			float percentChange = (lastAppliedLux == 0f) ? 100f : (gap / lastAppliedLux) * 100f;
+			
+			// If the ambient sensor data gap is significant (>50 lux AND >50% change) then react immediately
+			if (gap > 50f && percentChange > 50f) {
+				// Clear old data and apply new brightness instantly
+				buffer.clear();
+				buffer.addLast(new SensorReading(now, rawLux));
+				rollingSum = rawLux;
+				applyAndRecord(rawLux);
+				return;
+			}
+		}
+
         buffer.addLast(new SensorReading(now, rawLux));
         rollingSum += rawLux;
 
