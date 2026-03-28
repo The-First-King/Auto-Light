@@ -110,7 +110,7 @@ public class LightService extends Service {
         Notification notification = builder
 				.setContentTitle(getString(R.string.notification_title))
 				.setContentText(getString(R.string.notification_text))
-                .setSmallIcon(android.R.drawable.ic_menu_compass)
+				.setSmallIcon(R.drawable.brightness_auto_24px)
                 .setOngoing(true)
                 .build();
 
