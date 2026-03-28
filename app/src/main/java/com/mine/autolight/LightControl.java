@@ -10,6 +10,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
 import android.provider.Settings;
+
 import java.util.ArrayDeque;
 
 public class LightControl implements SensorEventListener {
@@ -18,6 +19,8 @@ public class LightControl implements SensorEventListener {
     private final Sensor lightSensor;
     private final MySettings sett;
     private final ContentResolver cResolver;
+
+    // Used only to schedule stopListening after "pause" in non-always modes
     private final Handler delayer = new Handler(Looper.getMainLooper());
     private final long pause = 2500;
 
@@ -26,12 +29,13 @@ public class LightControl implements SensorEventListener {
     private boolean needsImmediateUpdate = false;
 
     private float lux = 0;
-    private int lastAppliedBrightness = -1;
-    private long firstDimRequestAt = 0L;
+    private int tempBrightness = 0;
 
+    // Window smoothing settings
     private final ArrayDeque<SensorReading> buffer = new ArrayDeque<>();
     private final long WINDOW_MS = 3000;
 
+    // Hysteresis
     private final float HYSTERESIS_THRESHOLD = 0.15f;
 
     private float lastAppliedLux = -1f;
@@ -64,7 +68,7 @@ public class LightControl implements SensorEventListener {
 
         if (needsImmediateUpdate || sett.mode == Constants.WORK_MODE_UNLOCK) {
             lux = rawLux;
-            setBrightnessFromLux((int) lux);
+            setBrightness((int) lux);
 
             if (sett.mode == Constants.WORK_MODE_UNLOCK) {
                 needsImmediateUpdate = false;
@@ -81,6 +85,7 @@ public class LightControl implements SensorEventListener {
     private void processSmoothedLux() {
         if (buffer.isEmpty()) return;
 
+        // First apply: use last sample immediately
         if (lastAppliedLux == -1f) {
             lux = buffer.peekLast().value;
             applyAndRecord(lux);
@@ -90,6 +95,7 @@ public class LightControl implements SensorEventListener {
         float averageLux = rollingSum / buffer.size();
         float diff = Math.abs(averageLux - lastAppliedLux);
 
+        // update if diff > 15% of lastAppliedLux OR diff > 5
         if (diff > (lastAppliedLux * HYSTERESIS_THRESHOLD) || diff > 5f) {
             lux = averageLux;
             applyAndRecord(lux);
@@ -97,7 +103,7 @@ public class LightControl implements SensorEventListener {
     }
 
     private void applyAndRecord(float luxVal) {
-        setBrightnessFromLux((int) luxVal);
+        setBrightness((int) luxVal);
         lastAppliedLux = luxVal;
     }
 
@@ -160,8 +166,34 @@ public class LightControl implements SensorEventListener {
         delayer.removeCallbacksAndMessages(null);
     }
 
-    public int getLastSensorValue() { return (int) lux; }
-    public int getSetBrightness() { return lastAppliedBrightness >= 0 ? lastAppliedBrightness : 0; }
+    private void setBrightness(int luxValue) {
+        int brightness;
+
+        if (luxValue <= sett.l1) brightness = sett.b1;
+        else if (luxValue >= sett.l4) brightness = sett.b4;
+        else {
+            float x1, y1, x2, y2;
+
+            if (luxValue <= sett.l2) { x1 = sett.l1; x2 = sett.l2; y1 = sett.b1; y2 = sett.b2; }
+            else if (luxValue <= sett.l3) { x1 = sett.l2; x2 = sett.l3; y1 = sett.b2; y2 = sett.b3; }
+            else { x1 = sett.l3; x2 = sett.l4; y1 = sett.b3; y2 = sett.b4; }
+
+            double lx = Math.log10((double) luxValue + 1.0);
+            double lx1 = Math.log10((double) x1 + 1.0);
+            double lx2 = Math.log10((double) x2 + 1.0);
+
+            double t = (lx2 - lx1 == 0) ? 0 : (lx - lx1) / (lx2 - lx1);
+            t = Math.max(0.0, Math.min(1.0, t));
+
+            brightness = (int) Math.round(y1 + (y2 - y1) * t);
+        }
+
+        tempBrightness = brightness;
+
+        try {
+            Settings.System.putInt(cResolver, Settings.System.SCREEN_BRIGHTNESS, brightness);
+        } catch (Exception ignored) { }
+    }
 
     public void reconfigure() {
         stopListening();
@@ -186,112 +218,9 @@ public class LightControl implements SensorEventListener {
         startListening();
     }
 
-    private void setBrightnessFromLux(int luxValue) {
-        int desired = computeBrightnessFromLux(luxValue);
-        boolean isAlwaysMode = (sett.mode == Constants.WORK_MODE_ALWAYS);
-        applyDesiredBrightness(desired, isAlwaysMode);
-    }
+    public int getLastSensorValue() { return (int) lux; }
 
-    private int computeBrightnessFromLux(int luxValue) {
-        int brightness;
-
-        if (luxValue <= sett.l1) {
-            brightness = sett.b1;
-        } else if (luxValue >= sett.l4) {
-            brightness = sett.b4;
-        } else {
-            float x1, y1, x2, y2;
-
-            if (luxValue <= sett.l2) {
-                x1 = sett.l1; x2 = sett.l2; y1 = sett.b1; y2 = sett.b2;
-            } else if (luxValue <= sett.l3) {
-                x1 = sett.l2; x2 = sett.l3; y1 = sett.b2; y2 = sett.b3;
-            } else {
-                x1 = sett.l3; x2 = sett.l4; y1 = sett.b3; y2 = sett.b4;
-            }
-
-            double lx = Math.log10((double) luxValue + 1.0);
-            double lx1 = Math.log10((double) x1 + 1.0);
-            double lx2 = Math.log10((double) x2 + 1.0);
-
-            double t = (lx2 - lx1 == 0) ? 0 : (lx - lx1) / (lx2 - lx1);
-            t = Math.max(0.0, Math.min(1.0, t));
-
-            brightness = (int) Math.round(y1 + (y2 - y1) * t);
-        }
-
-        if (brightness < 0)   brightness = 0;
-        if (brightness > 255) brightness = 255;
-
-        return brightness;
-    }
-
-    private void applyDesiredBrightness(int desired, boolean alwaysMode) {
-
-        if (lastAppliedBrightness < 0) {
-            writeSystemBrightness(desired);
-            lastAppliedBrightness = desired;
-            resetDimDebounceIfNeeded(/*current=*/desired, /*desired=*/desired);
-            return;
-        }
-
-        final int current = getCurrentSystemBrightness();
-
-        if (shouldApplyWithHysteresis(current, desired, alwaysMode)) {
-            writeSystemBrightness(desired);
-            lastAppliedBrightness = desired;
-            firstDimRequestAt = 0L;
-            resetDimDebounceIfNeeded(current, desired);
-        } else {
-            resetDimDebounceIfNeeded(current, desired);
-        }
-    }
-
-    private boolean shouldApplyWithHysteresis(int current, int desired, boolean alwaysMode) {
-        if (current < 0) return true;
-
-        final int upTh = sett.upThreshold;
-        final int downTh = sett.downThreshold;
-        final long dimMs = sett.dimDebounceMs;
-
-        if (desired > current) {
-            return desired - current >= upTh;
-        } else if (desired < current) {
-            if (dimMs > 0) {
-                final long now = SystemClock.elapsedRealtime();
-                if (firstDimRequestAt == 0L) {
-                    firstDimRequestAt = now;
-                    return false;
-                }
-                if (now - firstDimRequestAt < dimMs) {
-                    return false;
-                }
-            }
-            return current - desired >= downTh;
-        }
-
-        return false;
-    }
-
-    private void resetDimDebounceIfNeeded(int current, int desired) {
-        if (desired >= current) {
-            firstDimRequestAt = 0L;
-        }
-    }
-
-    private void writeSystemBrightness(int brightness) {
-        try {
-            Settings.System.putInt(cResolver, Settings.System.SCREEN_BRIGHTNESS, brightness);
-        } catch (Exception ignored) { }
-    }
-
-    private int getCurrentSystemBrightness() {
-        try {
-            return Settings.System.getInt(cResolver, Settings.System.SCREEN_BRIGHTNESS);
-        } catch (Exception e) {
-            return -1;
-        }
-    }
+    public int getSetBrightness() { return tempBrightness; }
 
     private static class SensorReading {
         final long time;
