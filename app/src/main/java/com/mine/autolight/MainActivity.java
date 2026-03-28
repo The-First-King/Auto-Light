@@ -19,12 +19,12 @@ public class MainActivity extends Activity {
 
     private Button btnStart;
     private TextView tvState;
-
     private EditText etSensor1, etSensor2, etSensor3, etSensor4;
     private EditText etBrightness1, etBrightness2, etBrightness3, etBrightness4;
-
+    private EditText etUpThreshold;
+    private EditText etDownThreshold;
+    private EditText etDimDebounceMs;
     private MySettings sett;
-
     private boolean isExpanded = false;
     private boolean isDialogShown = false;
 
@@ -84,20 +84,37 @@ public class MainActivity extends Activity {
         etBrightness3 = findViewById(R.id.et_brightness_value_3);
         etBrightness4 = findViewById(R.id.et_brightness_value_4);
 
+        etUpThreshold    = findViewById(R.id.et_up_threshold);
+        etDownThreshold  = findViewById(R.id.et_down_threshold);
+        etDimDebounceMs  = findViewById(R.id.et_dim_debounce_ms);
+
         refillCollapsibleSettings();
 
         Button btnSave = findViewById(R.id.btn_save_settings);
         btnSave.setOnClickListener(v -> {
             try {
-                sett.l1 = Integer.parseInt(etSensor1.getText().toString());
-                sett.l2 = Integer.parseInt(etSensor2.getText().toString());
-                sett.l3 = Integer.parseInt(etSensor3.getText().toString());
-                sett.l4 = Integer.parseInt(etSensor4.getText().toString());
+                sett.l1 = Integer.parseInt(etSensor1.getText().toString().trim());
+                sett.l2 = Integer.parseInt(etSensor2.getText().toString().trim());
+                sett.l3 = Integer.parseInt(etSensor3.getText().toString().trim());
+                sett.l4 = Integer.parseInt(etSensor4.getText().toString().trim());
 
-                sett.b1 = Integer.parseInt(etBrightness1.getText().toString());
-                sett.b2 = Integer.parseInt(etBrightness2.getText().toString());
-                sett.b3 = Integer.parseInt(etBrightness3.getText().toString());
-                sett.b4 = Integer.parseInt(etBrightness4.getText().toString());
+                sett.b1 = Integer.parseInt(etBrightness1.getText().toString().trim());
+                sett.b2 = Integer.parseInt(etBrightness2.getText().toString().trim());
+                sett.b3 = Integer.parseInt(etBrightness3.getText().toString().trim());
+                sett.b4 = Integer.parseInt(etBrightness4.getText().toString().trim());
+
+                if (etUpThreshold != null) {
+                    String upStr = etUpThreshold.getText().toString().trim();
+                    if (!upStr.isEmpty()) sett.upThreshold = Integer.parseInt(upStr);
+                }
+                if (etDownThreshold != null) {
+                    String downStr = etDownThreshold.getText().toString().trim();
+                    if (!downStr.isEmpty()) sett.downThreshold = Integer.parseInt(downStr);
+                }
+                if (etDimDebounceMs != null) {
+                    String dimStr = etDimDebounceMs.getText().toString().trim();
+                    if (!dimStr.isEmpty()) sett.dimDebounceMs = Long.parseLong(dimStr);
+                }
 
                 sett.save();
                 sendBroadcastToService(Constants.SERVICE_INTENT_PAYLOAD_SET);
@@ -120,10 +137,10 @@ public class MainActivity extends Activity {
 
         RadioGroup rgWorkMode = findViewById(R.id.rg_work_mode);
         rgWorkMode.setOnCheckedChangeListener((radioGroup, checkedId) -> {
-            if (checkedId == R.id.rb_work_always) sett.mode = Constants.WORK_MODE_ALWAYS;
-            if (checkedId == R.id.rb_work_portrait) sett.mode = Constants.WORK_MODE_PORTRAIT;
+            if (checkedId == R.id.rb_work_always)    sett.mode = Constants.WORK_MODE_ALWAYS;
+            if (checkedId == R.id.rb_work_portrait)  sett.mode = Constants.WORK_MODE_PORTRAIT;
             if (checkedId == R.id.rb_work_landscape) sett.mode = Constants.WORK_MODE_LANDSCAPE;
-            if (checkedId == R.id.rb_work_unlock) sett.mode = Constants.WORK_MODE_UNLOCK;
+            if (checkedId == R.id.rb_work_unlock)    sett.mode = Constants.WORK_MODE_UNLOCK;
 
             sett.save();
             sendBroadcastToService(Constants.SERVICE_INTENT_PAYLOAD_SET);
@@ -211,7 +228,6 @@ public class MainActivity extends Activity {
                 isDialogShown = false;
             });
             builder.setCancelable(false).show();
-
             isDialogShown = true;
             return false;
         }
@@ -237,11 +253,12 @@ public class MainActivity extends Activity {
                 break;
             case -1:
                 tvState.setText(R.string.starting_service);
-                               break;
+                break;
         }
     }
 
     private void refillCollapsibleSettings() {
+
         etSensor1.setText(String.valueOf(sett.l1));
         etSensor2.setText(String.valueOf(sett.l2));
         etSensor3.setText(String.valueOf(sett.l3));
@@ -251,5 +268,9 @@ public class MainActivity extends Activity {
         etBrightness2.setText(String.valueOf(sett.b2));
         etBrightness3.setText(String.valueOf(sett.b3));
         etBrightness4.setText(String.valueOf(sett.b4));
+
+        if (etUpThreshold != null)    etUpThreshold.setText(String.valueOf(sett.upThreshold));
+        if (etDownThreshold != null)  etDownThreshold.setText(String.valueOf(sett.downThreshold));
+        if (etDimDebounceMs != null)  etDimDebounceMs.setText(String.valueOf(sett.dimDebounceMs));
     }
 }
