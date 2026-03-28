@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Auto Light</string>
     <string name="settings">Settings</string>
@@ -18,4 +19,12 @@
     <string name="permission_request">This app requires permission to control screen brightness.\nSelect \"Auto Light\" and allow it to modify system settings.</string>
     <string name="starting_service">Starting service</string>
     <string name="m_landscape">Landscape only</string>
+    <string name="hysteresis_title">Brightness hysteresis</string>
+    <string name="hysteresis_help">Set how much change is required before updating brightness, and how long to wait before dimming in Always mode.</string>
+    <string name="up_threshold_label">Increase threshold</string>
+    <string name="down_threshold_label">Decrease threshold</string>
+    <string name="dim_debounce_label">Dim debounce (ms)</string>
+    <string name="up_threshold_hint">0-48</string>
+    <string name="down_threshold_hint">0-48</string>
+    <string name="dim_debounce_hint">0-5000</string>
 </resources>
