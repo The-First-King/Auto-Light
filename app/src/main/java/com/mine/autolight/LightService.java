@@ -36,6 +36,7 @@ public class LightService extends Service {
             lightControl.setLandscape(isLandscape);
 
             if (Intent.ACTION_SCREEN_OFF.equals(action)) {
+                lightControl.stopListening();
                 lightControl.prepareForScreenOn();
             } else if (Intent.ACTION_USER_PRESENT.equals(action) || Intent.ACTION_SCREEN_ON.equals(action)) {
                 if (settings.mode == Constants.WORK_MODE_UNLOCK) {
@@ -154,7 +155,6 @@ public class LightService extends Service {
         super.onDestroy();
     }
 
-    
 	@Override
 	public IBinder onBind(Intent intent) {
 		return null;
