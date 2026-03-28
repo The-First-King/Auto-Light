@@ -116,14 +116,14 @@ public class LightControl implements SensorEventListener {
         startListening();
     }
 
-	private void scheduleSuspend() {
-		if (sett.mode == Constants.WORK_MODE_ALWAYS) return;
-		if (sett.mode == Constants.WORK_MODE_PORTRAIT && landscape) return;
-		if (sett.mode == Constants.WORK_MODE_LANDSCAPE && !landscape) return;
+    private void scheduleSuspend() {
+        if (sett.mode == Constants.WORK_MODE_ALWAYS) return;
+        if (sett.mode == Constants.WORK_MODE_PORTRAIT && !landscape) return;
+        if (sett.mode == Constants.WORK_MODE_LANDSCAPE && landscape) return;
 
-		delayer.removeCallbacksAndMessages(null);
-		delayer.postDelayed(this::stopListening, pause);
-	}
+        delayer.removeCallbacksAndMessages(null);
+        delayer.postDelayed(this::stopListening, pause);
+    }
 
     public void startListening() {
         boolean shouldActivate = false;
