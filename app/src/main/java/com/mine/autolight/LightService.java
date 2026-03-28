@@ -108,8 +108,8 @@ public class LightService extends Service {
                         : new Notification.Builder(this);
 
         Notification notification = builder
-                .setContentTitle("Auto Light Active")
-                .setContentText("Monitoring brightness modes")
+				.setContentTitle(getString(R.string.notification_title))
+				.setContentText(getString(R.string.notification_text))
                 .setSmallIcon(android.R.drawable.ic_menu_compass)
                 .setOngoing(true)
                 .build();
