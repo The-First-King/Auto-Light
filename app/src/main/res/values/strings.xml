@@ -16,7 +16,7 @@
     <string name="start">Start</string>
     <string name="sensor_c">Sensor:</string>
     <string name="save_settings">Save settings</string>
-    <string name="permission_request">This app requires permission to control screen brightness.\nSelect \"Auto Light\" and allow it to modify system settings.</string>
+    <string name="permission_request">This app requires permission to control screen brightness.\n\nPlease allow modifying system settings for the \"Auto Light\".</string>
     <string name="starting_service">Starting service</string>
     <string name="m_landscape">Landscape only</string>
 </resources>
