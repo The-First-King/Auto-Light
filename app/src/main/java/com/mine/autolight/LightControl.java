@@ -12,83 +12,6 @@ import android.os.SystemClock;
 import android.provider.Settings;
 import java.util.ArrayDeque;
 
-    private void applyDesiredBrightness(int desired, boolean alwaysMode) {
-
-        if (lastAppliedBrightness < 0) {
-            writeSystemBrightness(desired);
-            lastAppliedBrightness = desired;
-            resetDimDebounceIfNeeded(/*current=*/desired, /*desired=*/desired);
-            return;
-        }
-
-        final int current = alwaysMode ? getCurrentSystemBrightness() : lastAppliedBrightness;
-
-        if (shouldApplyWithHysteresis(current, desired, alwaysMode)) {
-            writeSystemBrightness(desired);
-            lastAppliedBrightness = desired;
-            resetDimDebounceIfNeeded(current, desired);
-        } else {
-            resetDimDebounceIfNeeded(current, desired);
-        }
-    }
-
-    private boolean shouldApplyWithHysteresis(int current, int desired, boolean alwaysMode) {
-        if (current < 0) return true;
-
-        final int upTh = sett.upThreshold;
-        final int downTh = sett.downThreshold;
-        final long dimMs = sett.dimDebounceMs;
-
-        if (desired > current) {
-            return desired - current >= upTh;
-        } else if (desired < current) {
-            if (alwaysMode && dimMs > 0) {
-                final long now = SystemClock.elapsedRealtime();
-                if (firstDimRequestAt == 0L) {
-                    firstDimRequestAt = now;
-                    return false;
-                }
-                if (now - firstDimRequestAt < dimMs) {
-                    return false;
-                }
-            }
-            return current - desired >= downTh;
-        }
-
-        return false;
-    }
-
-    private void resetDimDebounceIfNeeded(int current, int desired) {
-        if (desired >= current) {
-            firstDimRequestAt = 0L;
-        }
-    }
-
-    private void writeSystemBrightness(int brightness) {
-        try {
-            Settings.System.putInt(cResolver, Settings.System.SCREEN_BRIGHTNESS, brightness);
-        } catch (Exception ignored) { }
-    }
-
-    private int getCurrentSystemBrightness() {
-        try {
-            return Settings.System.getInt(cResolver, Settings.System.SCREEN_BRIGHTNESS);
-        } catch (Exception e) {
-            return -1;
-        }
-    }
-
-    private static class SensorReading {
-        final long time;
-        final float value;
-
-        SensorReading(long time, float value) {
-            this.time = time;
-            this.value = value;
-        }
-    }
-}
-
 public class LightControl implements SensorEventListener {
 
     private final SensorManager sMgr;
@@ -302,3 +225,80 @@ public class LightControl implements SensorEventListener {
 
         return brightness;
     }
+
+    private void applyDesiredBrightness(int desired, boolean alwaysMode) {
+
+        if (lastAppliedBrightness < 0) {
+            writeSystemBrightness(desired);
+            lastAppliedBrightness = desired;
+            resetDimDebounceIfNeeded(/*current=*/desired, /*desired=*/desired);
+            return;
+        }
+
+        final int current = alwaysMode ? getCurrentSystemBrightness() : lastAppliedBrightness;
+
+        if (shouldApplyWithHysteresis(current, desired, alwaysMode)) {
+            writeSystemBrightness(desired);
+            lastAppliedBrightness = desired;
+            resetDimDebounceIfNeeded(current, desired);
+        } else {
+            resetDimDebounceIfNeeded(current, desired);
+        }
+    }
+
+    private boolean shouldApplyWithHysteresis(int current, int desired, boolean alwaysMode) {
+        if (current < 0) return true;
+
+        final int upTh = sett.upThreshold;
+        final int downTh = sett.downThreshold;
+        final long dimMs = sett.dimDebounceMs;
+
+        if (desired > current) {
+            return desired - current >= upTh;
+        } else if (desired < current) {
+            if (alwaysMode && dimMs > 0) {
+                final long now = SystemClock.elapsedRealtime();
+                if (firstDimRequestAt == 0L) {
+                    firstDimRequestAt = now;
+                    return false;
+                }
+                if (now - firstDimRequestAt < dimMs) {
+                    return false;
+                }
+            }
+            return current - desired >= downTh;
+        }
+
+        return false;
+    }
+
+    private void resetDimDebounceIfNeeded(int current, int desired) {
+        if (desired >= current) {
+            firstDimRequestAt = 0L;
+        }
+    }
+
+    private void writeSystemBrightness(int brightness) {
+        try {
+            Settings.System.putInt(cResolver, Settings.System.SCREEN_BRIGHTNESS, brightness);
+        } catch (Exception ignored) { }
+    }
+
+    private int getCurrentSystemBrightness() {
+        try {
+            return Settings.System.getInt(cResolver, Settings.System.SCREEN_BRIGHTNESS);
+        } catch (Exception e) {
+            return -1;
+        }
+    }
+
+    private static class SensorReading {
+        final long time;
+        final float value;
+
+        SensorReading(long time, float value) {
+            this.time = time;
+            this.value = value;
+        }
+    }
+}
