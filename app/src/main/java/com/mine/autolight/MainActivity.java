@@ -19,14 +19,15 @@ public class MainActivity extends Activity {
 
     private Button btnStart;
     private TextView tvState;
-
     private EditText etSensor1, etSensor2, etSensor3, etSensor4;
     private EditText etBrightness1, etBrightness2, etBrightness3, etBrightness4;
-
     private MySettings sett;
-
     private boolean isExpanded = false;
     private boolean isDialogShown = false;
+    private static final int SENSOR_MIN = 0;
+    private static final int SENSOR_MAX = 200000;
+    private static final int BRIGHTNESS_MIN = 1;
+    private static final int BRIGHTNESS_MAX = 100;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,23 +89,9 @@ public class MainActivity extends Activity {
 
         Button btnSave = findViewById(R.id.btn_save_settings);
         btnSave.setOnClickListener(v -> {
-            try {
-                sett.l1 = Integer.parseInt(etSensor1.getText().toString());
-                sett.l2 = Integer.parseInt(etSensor2.getText().toString());
-                sett.l3 = Integer.parseInt(etSensor3.getText().toString());
-                sett.l4 = Integer.parseInt(etSensor4.getText().toString());
-
-                sett.b1 = Integer.parseInt(etBrightness1.getText().toString());
-                sett.b2 = Integer.parseInt(etBrightness2.getText().toString());
-                sett.b3 = Integer.parseInt(etBrightness3.getText().toString());
-                sett.b4 = Integer.parseInt(etBrightness4.getText().toString());
-
-                sett.save();
-                sendBroadcastToService(Constants.SERVICE_INTENT_PAYLOAD_SET);
-
+            if (validateAndSaveSettings()) {
                 Toast.makeText(this, "Settings saved", Toast.LENGTH_SHORT).show();
-            } catch (NumberFormatException e) {
-                Toast.makeText(this, "Invalid input", Toast.LENGTH_SHORT).show();
+                sendBroadcastToService(Constants.SERVICE_INTENT_PAYLOAD_SET);
             }
         });
 
@@ -128,6 +115,92 @@ public class MainActivity extends Activity {
             sett.save();
             sendBroadcastToService(Constants.SERVICE_INTENT_PAYLOAD_SET);
         });
+    }
+
+    private boolean validateAndSaveSettings() {
+        try {
+            int l1 = Integer.parseInt(etSensor1.getText().toString());
+            int l2 = Integer.parseInt(etSensor2.getText().toString());
+            int l3 = Integer.parseInt(etSensor3.getText().toString());
+            int l4 = Integer.parseInt(etSensor4.getText().toString());
+
+            int b1 = Integer.parseInt(etBrightness1.getText().toString());
+            int b2 = Integer.parseInt(etBrightness2.getText().toString());
+            int b3 = Integer.parseInt(etBrightness3.getText().toString());
+            int b4 = Integer.parseInt(etBrightness4.getText().toString());
+
+            if (!isValidSensorValue(l1)) {
+                showErrorDialog("L1 must be between " + SENSOR_MIN + " and " + SENSOR_MAX);
+                return false;
+            }
+            if (!isValidSensorValue(l2)) {
+                showErrorDialog("L2 must be between " + SENSOR_MIN + " and " + SENSOR_MAX);
+                return false;
+            }
+            if (!isValidSensorValue(l3)) {
+                showErrorDialog("L3 must be between " + SENSOR_MIN + " and " + SENSOR_MAX);
+                return false;
+            }
+            if (!isValidSensorValue(l4)) {
+                showErrorDialog("L4 must be between " + SENSOR_MIN + " and " + SENSOR_MAX);
+                return false;
+            }
+
+            if (!isValidBrightnessValue(b1)) {
+                showErrorDialog("B1 must be between " + BRIGHTNESS_MIN + " and " + BRIGHTNESS_MAX);
+                return false;
+            }
+            if (!isValidBrightnessValue(b2)) {
+                showErrorDialog("B2 must be between " + BRIGHTNESS_MIN + " and " + BRIGHTNESS_MAX);
+                return false;
+            }
+            if (!isValidBrightnessValue(b3)) {
+                showErrorDialog("B3 must be between " + BRIGHTNESS_MIN + " and " + BRIGHTNESS_MAX);
+                return false;
+            }
+            if (!isValidBrightnessValue(b4)) {
+                showErrorDialog("B4 must be between " + BRIGHTNESS_MIN + " and " + BRIGHTNESS_MAX);
+                return false;
+            }
+
+            if (!(l1 < l2 && l2 < l3 && l3 < l4)) {
+                showErrorDialog("Sensor values must be in ascending order: L1 < L2 < L3 < L4");
+                return false;
+            }
+
+            sett.l1 = l1;
+            sett.l2 = l2;
+            sett.l3 = l3;
+            sett.l4 = l4;
+
+            sett.b1 = b1;
+            sett.b2 = b2;
+            sett.b3 = b3;
+            sett.b4 = b4;
+
+            sett.save();
+            return true;
+
+        } catch (NumberFormatException e) {
+            showErrorDialog("Invalid input. Please enter valid numbers.");
+            return false;
+        }
+    }
+
+    private boolean isValidSensorValue(int value) {
+        return value >= SENSOR_MIN && value <= SENSOR_MAX;
+    }
+
+    private boolean isValidBrightnessValue(int value) {
+        return value >= BRIGHTNESS_MIN && value <= BRIGHTNESS_MAX;
+    }
+
+    private void showErrorDialog(String message) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Input Error")
+                .setMessage(message)
+                .setPositiveButton("OK", (dialog, which) -> dialog.dismiss())
+                .show();
     }
 
     @Override
@@ -237,7 +310,7 @@ public class MainActivity extends Activity {
                 break;
             case -1:
                 tvState.setText(R.string.starting_service);
-                               break;
+                break;
         }
     }
 
