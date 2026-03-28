@@ -130,42 +130,47 @@ public class MainActivity extends Activity {
             int b4 = Integer.parseInt(etBrightness4.getText().toString());
 
             if (!isValidSensorValue(l1)) {
-                showErrorDialog("L1 must be between " + SENSOR_MIN + " and " + SENSOR_MAX);
+                showErrorDialog("1) Sensor must be between " + SENSOR_MIN + " and " + SENSOR_MAX);
                 return false;
             }
             if (!isValidSensorValue(l2)) {
-                showErrorDialog("L2 must be between " + SENSOR_MIN + " and " + SENSOR_MAX);
+                showErrorDialog("2) Sensor must be between " + SENSOR_MIN + " and " + SENSOR_MAX);
                 return false;
             }
             if (!isValidSensorValue(l3)) {
-                showErrorDialog("L3 must be between " + SENSOR_MIN + " and " + SENSOR_MAX);
+                showErrorDialog("3) Sensor must be between " + SENSOR_MIN + " and " + SENSOR_MAX);
                 return false;
             }
             if (!isValidSensorValue(l4)) {
-                showErrorDialog("L4 must be between " + SENSOR_MIN + " and " + SENSOR_MAX);
+                showErrorDialog("4) Sensor must be between " + SENSOR_MIN + " and " + SENSOR_MAX);
                 return false;
             }
 
             if (!isValidBrightnessValue(b1)) {
-                showErrorDialog("B1 must be between " + BRIGHTNESS_MIN + " and " + BRIGHTNESS_MAX);
+                showErrorDialog("1) Brightness must be between " + BRIGHTNESS_MIN + " and " + BRIGHTNESS_MAX);
                 return false;
             }
             if (!isValidBrightnessValue(b2)) {
-                showErrorDialog("B2 must be between " + BRIGHTNESS_MIN + " and " + BRIGHTNESS_MAX);
+                showErrorDialog("2) Brightness must be between " + BRIGHTNESS_MIN + " and " + BRIGHTNESS_MAX);
                 return false;
             }
             if (!isValidBrightnessValue(b3)) {
-                showErrorDialog("B3 must be between " + BRIGHTNESS_MIN + " and " + BRIGHTNESS_MAX);
+                showErrorDialog("3) Brightness must be between " + BRIGHTNESS_MIN + " and " + BRIGHTNESS_MAX);
                 return false;
             }
             if (!isValidBrightnessValue(b4)) {
-                showErrorDialog("B4 must be between " + BRIGHTNESS_MIN + " and " + BRIGHTNESS_MAX);
+                showErrorDialog("4) Brightness must be between " + BRIGHTNESS_MIN + " and " + BRIGHTNESS_MAX);
                 return false;
             }
 
             if (!(l1 < l2 && l2 < l3 && l3 < l4)) {
-                showErrorDialog("Sensor values must be in ascending order: L1 < L2 < L3 < L4");
-                return false;
+                showErrorDialog("Sensor values must be in ascending order: 1) < 2) < 3) < 4)");
+				return false;
+            }
+			
+			if (!(b1 < b2 && b2 < b3 && b3 < b4)) {
+				showErrorDialog("Brightness values must be in ascending order: 1) < 2) < 3) < 4)");
+				return false;
             }
 
             sett.l1 = l1;
