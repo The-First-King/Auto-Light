@@ -235,11 +235,12 @@ public class LightControl implements SensorEventListener {
             return;
         }
 
-        final int current = alwaysMode ? getCurrentSystemBrightness() : lastAppliedBrightness;
+        final int current = getCurrentSystemBrightness();
 
         if (shouldApplyWithHysteresis(current, desired, alwaysMode)) {
             writeSystemBrightness(desired);
             lastAppliedBrightness = desired;
+            firstDimRequestAt = 0L;
             resetDimDebounceIfNeeded(current, desired);
         } else {
             resetDimDebounceIfNeeded(current, desired);
@@ -256,7 +257,7 @@ public class LightControl implements SensorEventListener {
         if (desired > current) {
             return desired - current >= upTh;
         } else if (desired < current) {
-            if (alwaysMode && dimMs > 0) {
+            if (dimMs > 0) {
                 final long now = SystemClock.elapsedRealtime();
                 if (firstDimRequestAt == 0L) {
                     firstDimRequestAt = now;
