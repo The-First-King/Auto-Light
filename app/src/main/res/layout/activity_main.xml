@@ -75,29 +75,35 @@
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal">
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="1)"
+                        android:gravity="center_vertical"
                         tools:ignore="HardcodedText" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="12sp"
-                        android:text="@string/sensor_c" />
+                        android:text="@string/sensor_c"
+                        android:gravity="center_vertical" />
 
                     <EditText
                         android:id="@+id/et_sensor_value_1"
                         android:layout_width="75sp"
                         android:layout_height="wrap_content"
                         android:background="@android:drawable/editbox_background"
+                        android:textColor="@android:color/black"
+                        android:textColorHint="@android:color/darker_gray"
+                        android:gravity="center_vertical"
                         android:paddingLeft="8dp"
                         android:paddingRight="8dp"
-                        android:paddingTop="4dp"
-                        android:paddingBottom="4dp"
+                        android:paddingTop="6dp"
+                        android:paddingBottom="6dp"
                         android:importantForAutofill="no"
                         android:inputType="number"
                         android:singleLine="true"
@@ -107,17 +113,21 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="12sp"
-                        android:text="@string/brightness_c" />
+                        android:text="@string/brightness_c"
+                        android:gravity="center_vertical" />
 
                     <EditText
                         android:id="@+id/et_brightness_value_1"
                         android:layout_width="75sp"
                         android:layout_height="wrap_content"
                         android:background="@android:drawable/editbox_background"
+                        android:textColor="@android:color/black"
+                        android:textColorHint="@android:color/darker_gray"
+                        android:gravity="center_vertical"
                         android:paddingLeft="8dp"
                         android:paddingRight="8dp"
-                        android:paddingTop="4dp"
-                        android:paddingBottom="4dp"
+                        android:paddingTop="6dp"
+                        android:paddingBottom="6dp"
                         android:importantForAutofill="no"
                         android:inputType="number"
                         android:singleLine="true"
@@ -127,29 +137,35 @@
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal">
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="2)"
+                        android:gravity="center_vertical"
                         tools:ignore="HardcodedText" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="12sp"
-                        android:text="@string/sensor_c" />
+                        android:text="@string/sensor_c"
+                        android:gravity="center_vertical" />
 
                     <EditText
                         android:id="@+id/et_sensor_value_2"
                         android:layout_width="75sp"
                         android:layout_height="wrap_content"
                         android:background="@android:drawable/editbox_background"
+                        android:textColor="@android:color/black"
+                        android:textColorHint="@android:color/darker_gray"
+                        android:gravity="center_vertical"
                         android:paddingLeft="8dp"
                         android:paddingRight="8dp"
-                        android:paddingTop="4dp"
-                        android:paddingBottom="4dp"
+                        android:paddingTop="6dp"
+                        android:paddingBottom="6dp"
                         android:importantForAutofill="no"
                         android:inputType="number"
                         android:singleLine="true"
@@ -159,17 +175,21 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="12sp"
-                        android:text="@string/brightness_c" />
+                        android:text="@string/brightness_c"
+                        android:gravity="center_vertical" />
 
                     <EditText
                         android:id="@+id/et_brightness_value_2"
                         android:layout_width="75sp"
                         android:layout_height="wrap_content"
                         android:background="@android:drawable/editbox_background"
+                        android:textColor="@android:color/black"
+                        android:textColorHint="@android:color/darker_gray"
+                        android:gravity="center_vertical"
                         android:paddingLeft="8dp"
                         android:paddingRight="8dp"
-                        android:paddingTop="4dp"
-                        android:paddingBottom="4dp"
+                        android:paddingTop="6dp"
+                        android:paddingBottom="6dp"
                         android:importantForAutofill="no"
                         android:inputType="number"
                         android:singleLine="true"
@@ -179,29 +199,35 @@
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal">
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="3)"
+                        android:gravity="center_vertical"
                         tools:ignore="HardcodedText" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="12sp"
-                        android:text="@string/sensor_c" />
+                        android:text="@string/sensor_c"
+                        android:gravity="center_vertical" />
 
                     <EditText
                         android:id="@+id/et_sensor_value_3"
                         android:layout_width="75sp"
                         android:layout_height="wrap_content"
                         android:background="@android:drawable/editbox_background"
+                        android:textColor="@android:color/black"
+                        android:textColorHint="@android:color/darker_gray"
+                        android:gravity="center_vertical"
                         android:paddingLeft="8dp"
                         android:paddingRight="8dp"
-                        android:paddingTop="4dp"
-                        android:paddingBottom="4dp"
+                        android:paddingTop="6dp"
+                        android:paddingBottom="6dp"
                         android:importantForAutofill="no"
                         android:inputType="number"
                         android:singleLine="true"
@@ -211,17 +237,21 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="12sp"
-                        android:text="@string/brightness_c" />
+                        android:text="@string/brightness_c"
+                        android:gravity="center_vertical" />
 
                     <EditText
                         android:id="@+id/et_brightness_value_3"
                         android:layout_width="75sp"
                         android:layout_height="wrap_content"
                         android:background="@android:drawable/editbox_background"
+                        android:textColor="@android:color/black"
+                        android:textColorHint="@android:color/darker_gray"
+                        android:gravity="center_vertical"
                         android:paddingLeft="8dp"
                         android:paddingRight="8dp"
-                        android:paddingTop="4dp"
-                        android:paddingBottom="4dp"
+                        android:paddingTop="6dp"
+                        android:paddingBottom="6dp"
                         android:importantForAutofill="no"
                         android:inputType="number"
                         android:singleLine="true"
@@ -231,29 +261,35 @@
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal">
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="4)"
+                        android:gravity="center_vertical"
                         tools:ignore="HardcodedText" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="12sp"
-                        android:text="@string/sensor_c" />
+                        android:text="@string/sensor_c"
+                        android:gravity="center_vertical" />
 
                     <EditText
                         android:id="@+id/et_sensor_value_4"
                         android:layout_width="75sp"
                         android:layout_height="wrap_content"
                         android:background="@android:drawable/editbox_background"
+                        android:textColor="@android:color/black"
+                        android:textColorHint="@android:color/darker_gray"
+                        android:gravity="center_vertical"
                         android:paddingLeft="8dp"
                         android:paddingRight="8dp"
-                        android:paddingTop="4dp"
-                        android:paddingBottom="4dp"
+                        android:paddingTop="6dp"
+                        android:paddingBottom="6dp"
                         android:importantForAutofill="no"
                         android:inputType="number"
                         android:singleLine="true"
@@ -263,17 +299,21 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="12sp"
-                        android:text="@string/brightness_c" />
+                        android:text="@string/brightness_c"
+                        android:gravity="center_vertical" />
 
                     <EditText
                         android:id="@+id/et_brightness_value_4"
                         android:layout_width="75sp"
                         android:layout_height="wrap_content"
                         android:background="@android:drawable/editbox_background"
+                        android:textColor="@android:color/black"
+                        android:textColorHint="@android:color/darker_gray"
+                        android:gravity="center_vertical"
                         android:paddingLeft="8dp"
                         android:paddingRight="8dp"
-                        android:paddingTop="4dp"
-                        android:paddingBottom="4dp"
+                        android:paddingTop="6dp"
+                        android:paddingBottom="6dp"
                         android:importantForAutofill="no"
                         android:inputType="number"
                         android:singleLine="true"
