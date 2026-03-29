@@ -1,0 +1,6 @@
+Changes in Release 2.6:
+
+ - Introducing high-gap detection in ambient light to correct screen brightness values according to the user's predefined settings when one of the following work modes is in use: "Always", "Portrait only", or "Landscape only".
+ - For the power efficiency disabling usage of the ambient light sensor when the screen is off.
+ - Minor UI improvements including the service icon correction.
+ - Adding user input values validation for both sensor and screen brightness.
