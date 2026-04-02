@@ -1,0 +1,1 @@
+- Polished the configuration UI with improved alignment, symmetrical spacing, and standardized input limits for sensor and brightness values.
