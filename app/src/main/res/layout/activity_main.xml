@@ -9,7 +9,7 @@
     tools:ignore="LabelFor">
 
     <LinearLayout
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingTop="8dp"
         android:paddingLeft="12dp"
@@ -18,7 +18,7 @@
 
         <TextView
             android:id="@+id/tv_service_state"
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="0.3"
             android:gravity="center_vertical"
@@ -27,41 +27,41 @@
 
         <Button
             android:id="@+id/btn_start_stop"
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="0.7"
             android:text="@string/stop" />
     </LinearLayout>
 
     <View
-        android:layout_width="fill_parent"
-        android:layout_height="1dip"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
         android:layout_marginTop="10dp"
         android:layout_marginBottom="10dp"
         android:background="#808080" />
 
     <ScrollView
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content">
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scrollbarStyle="outsideOverlay">
 
         <LinearLayout
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingLeft="12dp"
             android:paddingRight="12dp"
-            android:paddingTop="5dp"
             android:paddingBottom="12dp"
             android:orientation="vertical">
 
             <Button
                 android:id="@+id/btn_get_state"
-                android:layout_width="fill_parent"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/get_data" />
 
             <Button
                 android:id="@+id/btn_expand"
-                android:layout_width="fill_parent"
+                android:layout_width="match_parent"
                 android:layout_height="34sp"
                 android:layout_marginTop="5dp"
                 android:text="@string/show_config"
@@ -69,7 +69,7 @@
 
             <LinearLayout
                 android:id="@+id/ll_hidden_settings"
-                android:layout_width="fill_parent"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
@@ -90,7 +90,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="12sp"
+                        android:layout_marginStart="12dp"
                         android:text="@string/sensor_c"
                         android:gravity="center_vertical" />
 
@@ -115,7 +115,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="12sp"
+                        android:layout_marginStart="12dp"
                         android:text="@string/brightness_c"
                         android:gravity="center_vertical" />
 
@@ -155,7 +155,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="12sp"
+                        android:layout_marginStart="12dp"
                         android:text="@string/sensor_c"
                         android:gravity="center_vertical" />
 
@@ -180,7 +180,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="12sp"
+                        android:layout_marginStart="12dp"
                         android:text="@string/brightness_c"
                         android:gravity="center_vertical" />
 
@@ -220,7 +220,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="12sp"
+                        android:layout_marginStart="12dp"
                         android:text="@string/sensor_c"
                         android:gravity="center_vertical" />
 
@@ -245,7 +245,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="12sp"
+                        android:layout_marginStart="12dp"
                         android:text="@string/brightness_c"
                         android:gravity="center_vertical" />
 
@@ -285,7 +285,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="12sp"
+                        android:layout_marginStart="12dp"
                         android:text="@string/sensor_c"
                         android:gravity="center_vertical" />
 
@@ -310,7 +310,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="12sp"
+                        android:layout_marginStart="12dp"
                         android:text="@string/brightness_c"
                         android:gravity="center_vertical" />
 
@@ -334,11 +334,11 @@
                 </LinearLayout>
 
                 <LinearLayout
-                    android:layout_width="fill_parent" 
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_horizontal">
-                    
+
                     <Button
                         android:id="@+id/btn_save_settings"
                         android:layout_width="wrap_content"
@@ -347,17 +347,16 @@
                 </LinearLayout>
 
                 <View
-                    android:layout_width="fill_parent"
-                    android:layout_height="1dip"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
                     android:layout_marginTop="10dp"
                     android:layout_marginBottom="10dp"
                     android:background="#808080" />
             </LinearLayout>
 
             <TextView
-                android:layout_width="fill_parent"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="15dp"
                 android:text="@string/work_mode_c"
                 android:textSize="18sp" />
 
