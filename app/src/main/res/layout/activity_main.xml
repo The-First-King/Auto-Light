@@ -121,7 +121,7 @@
 
                     <EditText
                         android:id="@+id/et_brightness_value_1"
-                        android:layout_width="40dp"
+                        android:layout_width="45dp"
                         android:layout_height="wrap_content"
                         android:background="@android:drawable/editbox_background"
                         android:textColor="@android:color/black"
@@ -186,7 +186,7 @@
 
                     <EditText
                         android:id="@+id/et_brightness_value_2"
-                        android:layout_width="40dp"
+                        android:layout_width="45dp"
                         android:layout_height="wrap_content"
                         android:background="@android:drawable/editbox_background"
                         android:textColor="@android:color/black"
@@ -251,7 +251,7 @@
 
                     <EditText
                         android:id="@+id/et_brightness_value_3"
-                        android:layout_width="40dp"
+                        android:layout_width="45dp"
                         android:layout_height="wrap_content"
                         android:background="@android:drawable/editbox_background"
                         android:textColor="@android:color/black"
@@ -316,7 +316,7 @@
 
                     <EditText
                         android:id="@+id/et_brightness_value_4"
-                        android:layout_width="40dp"
+                        android:layout_width="45dp"
                         android:layout_height="wrap_content"
                         android:background="@android:drawable/editbox_background"
                         android:textColor="@android:color/black"
