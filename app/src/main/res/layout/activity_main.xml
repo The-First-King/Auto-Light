@@ -37,6 +37,7 @@
         android:layout_width="fill_parent"
         android:layout_height="1dip"
         android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
         android:background="#808080" />
 
     <ScrollView
@@ -75,6 +76,7 @@
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
                     android:orientation="horizontal"
                     android:gravity="center_vertical">
 
@@ -99,7 +101,8 @@
                         android:background="@android:drawable/editbox_background"
                         android:textColor="@android:color/black"
                         android:textColorHint="@android:color/darker_gray"
-                        android:gravity="center_vertical"
+                        android:gravity="center"
+                        android:maxLength="6"
                         android:paddingLeft="8dp"
                         android:paddingRight="8dp"
                         android:paddingTop="6dp"
@@ -123,7 +126,8 @@
                         android:background="@android:drawable/editbox_background"
                         android:textColor="@android:color/black"
                         android:textColorHint="@android:color/darker_gray"
-                        android:gravity="center_vertical"
+                        android:gravity="center"
+                        android:maxLength="3"
                         android:paddingLeft="8dp"
                         android:paddingRight="8dp"
                         android:paddingTop="6dp"
@@ -137,6 +141,7 @@
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
                     android:orientation="horizontal"
                     android:gravity="center_vertical">
 
@@ -161,7 +166,8 @@
                         android:background="@android:drawable/editbox_background"
                         android:textColor="@android:color/black"
                         android:textColorHint="@android:color/darker_gray"
-                        android:gravity="center_vertical"
+                        android:gravity="center"
+                        android:maxLength="6"
                         android:paddingLeft="8dp"
                         android:paddingRight="8dp"
                         android:paddingTop="6dp"
@@ -185,7 +191,8 @@
                         android:background="@android:drawable/editbox_background"
                         android:textColor="@android:color/black"
                         android:textColorHint="@android:color/darker_gray"
-                        android:gravity="center_vertical"
+                        android:gravity="center"
+                        android:maxLength="3"
                         android:paddingLeft="8dp"
                         android:paddingRight="8dp"
                         android:paddingTop="6dp"
@@ -199,6 +206,7 @@
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
                     android:orientation="horizontal"
                     android:gravity="center_vertical">
 
@@ -223,7 +231,8 @@
                         android:background="@android:drawable/editbox_background"
                         android:textColor="@android:color/black"
                         android:textColorHint="@android:color/darker_gray"
-                        android:gravity="center_vertical"
+                        android:gravity="center"
+                        android:maxLength="6"
                         android:paddingLeft="8dp"
                         android:paddingRight="8dp"
                         android:paddingTop="6dp"
@@ -247,7 +256,8 @@
                         android:background="@android:drawable/editbox_background"
                         android:textColor="@android:color/black"
                         android:textColorHint="@android:color/darker_gray"
-                        android:gravity="center_vertical"
+                        android:gravity="center"
+                        android:maxLength="3"
                         android:paddingLeft="8dp"
                         android:paddingRight="8dp"
                         android:paddingTop="6dp"
@@ -261,6 +271,7 @@
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
                     android:orientation="horizontal"
                     android:gravity="center_vertical">
 
@@ -285,7 +296,8 @@
                         android:background="@android:drawable/editbox_background"
                         android:textColor="@android:color/black"
                         android:textColorHint="@android:color/darker_gray"
-                        android:gravity="center_vertical"
+                        android:gravity="center"
+                        android:maxLength="6"
                         android:paddingLeft="8dp"
                         android:paddingRight="8dp"
                         android:paddingTop="6dp"
@@ -309,7 +321,8 @@
                         android:background="@android:drawable/editbox_background"
                         android:textColor="@android:color/black"
                         android:textColorHint="@android:color/darker_gray"
-                        android:gravity="center_vertical"
+                        android:gravity="center"
+                        android:maxLength="3"
                         android:paddingLeft="8dp"
                         android:paddingRight="8dp"
                         android:paddingTop="6dp"
@@ -320,23 +333,24 @@
                         android:text="" />
                 </LinearLayout>
 
-				<LinearLayout
-					android:layout_width="fill_parent" 
-					android:layout_height="wrap_content"
-					android:orientation="horizontal"
-					android:gravity="center_horizontal">
-					
-					<Button
-						android:id="@+id/btn_save_settings"
-						android:layout_width="wrap_content"
-						android:layout_height="wrap_content"
-						android:text="@string/save_settings" />
-				</LinearLayout>
+                <LinearLayout
+                    android:layout_width="fill_parent" 
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_horizontal">
+                    
+                    <Button
+                        android:id="@+id/btn_save_settings"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/save_settings" />
+                </LinearLayout>
 
                 <View
                     android:layout_width="fill_parent"
                     android:layout_height="1dip"
                     android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp"
                     android:background="#808080" />
             </LinearLayout>
 
