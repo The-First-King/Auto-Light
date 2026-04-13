@@ -18,6 +18,7 @@ public class LightControl implements SensorEventListener {
     private final Sensor lightSensor;
     private final MySettings sett;
     private final ContentResolver cResolver;
+    private final Context context;
 
     // Used only to schedule stopListening after "pause" in non-always modes
     private final Handler delayer = new Handler(Looper.getMainLooper());
@@ -41,6 +42,7 @@ public class LightControl implements SensorEventListener {
     private float rollingSum = 0f;
 
     LightControl(Context context) {
+        this.context = context;
         sett = new MySettings(context);
         cResolver = context.getContentResolver();
         sMgr = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
@@ -57,20 +59,20 @@ public class LightControl implements SensorEventListener {
         float rawLux = event.values[0];
         long now = SystemClock.elapsedRealtime();
 
-		if (lastAppliedLux != -1f && !needsImmediateUpdate) {
-			float gap = Math.abs(rawLux - lastAppliedLux);
-			float percentChange = (lastAppliedLux == 0f) ? 100f : (gap / lastAppliedLux) * 100f;
-			
-			// If the ambient sensor data gap is significant (>50 lux AND >50% change) then react immediately
-			if (gap > 50f && percentChange > 50f) {
-				// Clear old data and apply new brightness instantly
-				buffer.clear();
-				buffer.addLast(new SensorReading(now, rawLux));
-				rollingSum = rawLux;
-				applyAndRecord(rawLux);
-				return;
-			}
-		}
+        if (lastAppliedLux != -1f && !needsImmediateUpdate) {
+            float gap = Math.abs(rawLux - lastAppliedLux);
+            float percentChange = (lastAppliedLux == 0f) ? 100f : (gap / lastAppliedLux) * 100f;
+            
+            // If the ambient sensor data gap is significant (>50 lux AND >50% change) then react immediately
+            if (gap > 50f && percentChange > 50f) {
+                // Clear old data and apply new brightness instantly
+                buffer.clear();
+                buffer.addLast(new SensorReading(now, rawLux));
+                rollingSum = rawLux;
+                applyAndRecord(rawLux);
+                return;
+            }
+        }
 
         buffer.addLast(new SensorReading(now, rawLux));
         rollingSum += rawLux;
@@ -179,10 +181,10 @@ public class LightControl implements SensorEventListener {
     }
 
     private void setBrightness(int luxValue) {
-        int brightness;
+        int brightnessPercent;
 
-        if (luxValue <= sett.l1) brightness = sett.b1;
-        else if (luxValue >= sett.l4) brightness = sett.b4;
+        if (luxValue <= sett.l1) brightnessPercent = sett.b1;
+        else if (luxValue >= sett.l4) brightnessPercent = sett.b4;
         else {
             float x1, y1, x2, y2;
 
@@ -197,13 +199,23 @@ public class LightControl implements SensorEventListener {
             double t = (lx2 - lx1 == 0) ? 0 : (lx - lx1) / (lx2 - lx1);
             t = Math.max(0.0, Math.min(1.0, t));
 
-            brightness = (int) Math.round(y1 + (y2 - y1) * t);
+            brightnessPercent = (int) Math.round(y1 + (y2 - y1) * t);
         }
 
-        tempBrightness = brightness;
+        tempBrightness = brightnessPercent;
+
+        int systemMax = 255;
+        int resId = context.getResources().getIdentifier("config_screenBrightnessSettingMaximum", "integer", "android");
+        if (resId > 0) {
+            systemMax = context.getResources().getInteger(resId);
+        }
+
+        int finalSystemValue = Math.round((brightnessPercent / 100.0f) * systemMax);
+
+        finalSystemValue = Math.max(1, Math.min(systemMax, finalSystemValue));
 
         try {
-            Settings.System.putInt(cResolver, Settings.System.SCREEN_BRIGHTNESS, brightness);
+            Settings.System.putInt(cResolver, Settings.System.SCREEN_BRIGHTNESS, finalSystemValue);
         } catch (Exception ignored) { }
     }
 
