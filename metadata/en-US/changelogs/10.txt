@@ -1,0 +1,1 @@
+- Fixed brightness scaling issues on modern devices such as OnePlus with OxygenOS.
