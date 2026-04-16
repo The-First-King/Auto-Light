@@ -1,0 +1,1 @@
+- Resolved layout "cut-off" issues on full support Edge-to-Edge displays on modern devices running Android 15+.
