@@ -21,6 +21,13 @@ public class MainActivity extends Activity {
     private TextView tvState;
     private EditText etSensor1, etSensor2, etSensor3, etSensor4;
     private EditText etBrightness1, etBrightness2, etBrightness3, etBrightness4;
+    
+    // Fine-tuning sliders and value fields
+    private SeekBar sliderSensitivity, sliderMinimumChange, sliderSmoothingDuration;
+    private SeekBar sliderQuickReactLux, sliderQuickReactPercent;
+    private EditText etSensitivityValue, etMinimumChangeValue, etSmoothingDurationValue;
+    private EditText etQuickReactLuxValue, etQuickReactPercentValue;
+    
     private MySettings sett;
     private boolean isExpanded = false;
     private boolean isDialogShown = false;
@@ -85,7 +92,82 @@ public class MainActivity extends Activity {
         etBrightness3 = findViewById(R.id.et_brightness_value_3);
         etBrightness4 = findViewById(R.id.et_brightness_value_4);
 
+        // Fine-tuning sliders
+        sliderSensitivity = findViewById(R.id.slider_sensitivity);
+        sliderMinimumChange = findViewById(R.id.slider_minimum_change);
+        sliderSmoothingDuration = findViewById(R.id.slider_smoothing_duration);
+        sliderQuickReactLux = findViewById(R.id.slider_quick_react_lux);
+        sliderQuickReactPercent = findViewById(R.id.slider_quick_react_percent);
+
+        // Fine-tuning value fields
+        etSensitivityValue = findViewById(R.id.et_sensitivity_value);
+        etMinimumChangeValue = findViewById(R.id.et_minimum_change_value);
+        etSmoothingDurationValue = findViewById(R.id.et_smoothing_duration_value);
+        etQuickReactLuxValue = findViewById(R.id.et_quick_react_lux_value);
+        etQuickReactPercentValue = findViewById(R.id.et_quick_react_percent_value);
+
         refillCollapsibleSettings();
+
+        // Setup slider listeners
+        sliderSensitivity.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                float value = 0.05f + (progress * 0.05f);
+                etSensitivityValue.setText(String.format("%.2f", value));
+            }
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {}
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {}
+        });
+
+        sliderMinimumChange.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                int value = 1 + (progress * 1);
+                etMinimumChangeValue.setText(String.valueOf(value));
+            }
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {}
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {}
+        });
+
+        sliderSmoothingDuration.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                int value = 500 + (progress * 500);
+                etSmoothingDurationValue.setText(String.valueOf(value));
+            }
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {}
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {}
+        });
+
+        sliderQuickReactLux.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                int value = 20 + (progress * 10);
+                etQuickReactLuxValue.setText(String.valueOf(value));
+            }
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {}
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {}
+        });
+
+        sliderQuickReactPercent.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                int value = 20 + (progress * 5);
+                etQuickReactPercentValue.setText(String.valueOf(value));
+            }
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {}
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {}
+        });
 
         Button btnSave = findViewById(R.id.btn_save_settings);
         btnSave.setOnClickListener(v -> {
@@ -165,12 +247,12 @@ public class MainActivity extends Activity {
 
             if (!(l1 < l2 && l2 < l3 && l3 < l4)) {
                 showErrorDialog("Sensor values must be in ascending order: 1) < 2) < 3) < 4)");
-				return false;
+                return false;
             }
-			
-			if (!(b1 < b2 && b2 < b3 && b3 < b4)) {
-				showErrorDialog("Brightness values must be in ascending order: 1) < 2) < 3) < 4)");
-				return false;
+
+            if (!(b1 < b2 && b2 < b3 && b3 < b4)) {
+                showErrorDialog("Brightness values must be in ascending order: 1) < 2) < 3) < 4)");
+                return false;
             }
 
             sett.l1 = l1;
@@ -182,6 +264,13 @@ public class MainActivity extends Activity {
             sett.b2 = b2;
             sett.b3 = b3;
             sett.b4 = b4;
+
+            // Save fine-tuning parameters from sliders
+            sett.hysteresisThreshold = 0.05f + (sliderSensitivity.getProgress() * 0.05f);
+            sett.absoluteThreshold = 1 + (sliderMinimumChange.getProgress() * 1);
+            sett.windowMs = 500 + (sliderSmoothingDuration.getProgress() * 500);
+            sett.quickReactLux = 20 + (sliderQuickReactLux.getProgress() * 10);
+            sett.quickReactPercent = 20 + (sliderQuickReactPercent.getProgress() * 5);
 
             sett.save();
             return true;
@@ -329,5 +418,19 @@ public class MainActivity extends Activity {
         etBrightness2.setText(String.valueOf(sett.b2));
         etBrightness3.setText(String.valueOf(sett.b3));
         etBrightness4.setText(String.valueOf(sett.b4));
+
+        // Set slider positions based on saved settings
+        sliderSensitivity.setProgress(Math.round((sett.hysteresisThreshold - 0.05f) / 0.05f));
+        sliderMinimumChange.setProgress(sett.absoluteThreshold - 1);
+        sliderSmoothingDuration.setProgress((sett.windowMs - 500) / 500);
+        sliderQuickReactLux.setProgress((sett.quickReactLux - 20) / 10);
+        sliderQuickReactPercent.setProgress((sett.quickReactPercent - 20) / 5);
+
+        // Update display values
+        etSensitivityValue.setText(String.format("%.2f", sett.hysteresisThreshold));
+        etMinimumChangeValue.setText(String.valueOf(sett.absoluteThreshold));
+        etSmoothingDurationValue.setText(String.valueOf(sett.windowMs));
+        etQuickReactLuxValue.setText(String.valueOf(sett.quickReactLux));
+        etQuickReactPercentValue.setText(String.valueOf(sett.quickReactPercent));
     }
 }
