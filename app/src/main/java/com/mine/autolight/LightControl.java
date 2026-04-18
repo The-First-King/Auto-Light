@@ -33,10 +33,6 @@ public class LightControl implements SensorEventListener {
 
     // Window smoothing settings
     private final ArrayDeque<SensorReading> buffer = new ArrayDeque<>();
-    private final long WINDOW_MS = 3000;
-
-    // Hysteresis
-    private final float HYSTERESIS_THRESHOLD = 0.15f;
 
     private float lastAppliedLux = -1f;
     private float rollingSum = 0f;
@@ -63,8 +59,8 @@ public class LightControl implements SensorEventListener {
             float gap = Math.abs(rawLux - lastAppliedLux);
             float percentChange = (lastAppliedLux == 0f) ? 100f : (gap / lastAppliedLux) * 100f;
             
-            // If the ambient sensor data gap is significant (>50 lux AND >50% change) then react immediately
-            if (gap > 50f && percentChange > 50f) {
+            // If the ambient sensor data gap is significant, react immediately
+            if (gap > sett.quickReactLux && percentChange > sett.quickReactPercent) {
                 // Clear old data and apply new brightness instantly
                 buffer.clear();
                 buffer.addLast(new SensorReading(now, rawLux));
@@ -77,7 +73,7 @@ public class LightControl implements SensorEventListener {
         buffer.addLast(new SensorReading(now, rawLux));
         rollingSum += rawLux;
 
-        while (!buffer.isEmpty() && (now - buffer.peekFirst().time) > WINDOW_MS) {
+        while (!buffer.isEmpty() && (now - buffer.peekFirst().time) > sett.windowMs) {
             SensorReading old = buffer.removeFirst();
             rollingSum -= old.value;
         }
@@ -111,8 +107,8 @@ public class LightControl implements SensorEventListener {
         float averageLux = rollingSum / buffer.size();
         float diff = Math.abs(averageLux - lastAppliedLux);
 
-        // update if diff > 15% of lastAppliedLux OR diff > 5
-        if (diff > (lastAppliedLux * HYSTERESIS_THRESHOLD) || diff > 5f) {
+        // Update if diff > (hysteresis% of lastAppliedLux) OR diff > absoluteThreshold
+        if (diff > (lastAppliedLux * sett.hysteresisThreshold) || diff > sett.absoluteThreshold) {
             lux = averageLux;
             applyAndRecord(lux);
         }
