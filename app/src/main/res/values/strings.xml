@@ -19,6 +19,12 @@
     <string name="permission_request">This app requires permission to control screen brightness.\n\nPlease allow modifying system settings for the \"Auto Light\".</string>
     <string name="starting_service">Starting service</string>
     <string name="m_landscape">Landscape only</string>
-	<string name="notification_title">Auto Light Service is active</string>
-	<string name="notification_text">Managing screen brightness</string> 
+    <string name="notification_title">Auto Light Service is active</string>
+    <string name="notification_text">Managing screen brightness</string>
+    <string name="fine_tuning_section">Adaptive brightness algorithm fine-tuning:</string>
+    <string name="sensitivity">Sensitivity: higher means less frequent updates.</string>
+    <string name="minimum_change">Minimum Change: ignore tiny lux fluctuations.</string>
+    <string name="smoothing_duration">Smoothing Duration: longer means smoother, but slower response.</string>
+    <string name="quick_react_lux">Quick React (Lux): bypass smoothing if brightness changes by this value.</string>
+    <string name="quick_react_percent">Quick React (%): bypass smoothing if brightness changes by this percentage.</string>
 </resources>
