@@ -10,6 +10,12 @@ public class MySettings {
 
     public int l1, l2, l3, l4, b1, b2, b3, b4;
     public int mode;
+    
+    public float hysteresisThreshold;
+    public int absoluteThreshold;
+    public int windowMs;
+    public int quickReactLux;
+    public int quickReactPercent;
 
     MySettings(Context context) {
         this.context = context;
@@ -30,6 +36,12 @@ public class MySettings {
         b4 = sharedPref.getInt("b4", 90);
 
         mode = sharedPref.getInt("mode", Constants.WORK_MODE_UNLOCK);
+        
+        hysteresisThreshold = sharedPref.getFloat("hysteresisThreshold", 0.15f);
+        absoluteThreshold = sharedPref.getInt("absoluteThreshold", 5);
+        windowMs = sharedPref.getInt("windowMs", 3000);
+        quickReactLux = sharedPref.getInt("quickReactLux", 50);
+        quickReactPercent = sharedPref.getInt("quickReactPercent", 50);
     }
 
     public void save() {
@@ -46,6 +58,12 @@ public class MySettings {
         editor.putInt("b4", b4);
 
         editor.putInt("mode", mode);
+        
+        editor.putFloat("hysteresisThreshold", hysteresisThreshold);
+        editor.putInt("absoluteThreshold", absoluteThreshold);
+        editor.putInt("windowMs", windowMs);
+        editor.putInt("quickReactLux", quickReactLux);
+        editor.putInt("quickReactPercent", quickReactPercent);
 
         editor.apply();
     }
