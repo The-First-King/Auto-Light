@@ -334,6 +334,233 @@
                         android:text="" />
                 </LinearLayout>
 
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp"
+                    android:background="#808080" />
+
+                <!-- Adaptive Brightness Fine-Tuning Section -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/fine_tuning_section"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="12dp" />
+
+                <!-- 1. Sensitivity Slider (HYSTERESIS_THRESHOLD) -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/sensitivity"
+                    android:textSize="14sp"
+                    android:layout_marginBottom="4dp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="12dp">
+
+                    <SeekBar
+                        android:id="@+id/slider_sensitivity"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:max="5"
+                        android:progress="3"
+                        android:layout_marginEnd="12dp" />
+
+                    <EditText
+                        android:id="@+id/et_sensitivity_value"
+                        android:layout_width="60dp"
+                        android:layout_height="wrap_content"
+                        android:background="@android:drawable/editbox_background"
+                        android:textColor="@android:color/black"
+                        android:gravity="center"
+                        android:maxLength="4"
+                        android:paddingLeft="8dp"
+                        android:paddingRight="8dp"
+                        android:paddingTop="6dp"
+                        android:paddingBottom="6dp"
+                        android:inputType="number"
+                        android:singleLine="true"
+                        android:editable="false"
+                        android:text="0.15" />
+                </LinearLayout>
+
+                <!-- 2. Minimum Change Slider (ABSOLUTE_THRESHOLD) -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/minimum_change"
+                    android:textSize="14sp"
+                    android:layout_marginBottom="4dp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="12dp">
+
+                    <SeekBar
+                        android:id="@+id/slider_minimum_change"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:max="14"
+                        android:progress="4"
+                        android:layout_marginEnd="12dp" />
+
+                    <EditText
+                        android:id="@+id/et_minimum_change_value"
+                        android:layout_width="60dp"
+                        android:layout_height="wrap_content"
+                        android:background="@android:drawable/editbox_background"
+                        android:textColor="@android:color/black"
+                        android:gravity="center"
+                        android:maxLength="2"
+                        android:paddingLeft="8dp"
+                        android:paddingRight="8dp"
+                        android:paddingTop="6dp"
+                        android:paddingBottom="6dp"
+                        android:inputType="number"
+                        android:singleLine="true"
+                        android:editable="false"
+                        android:text="5" />
+                </LinearLayout>
+
+                <!-- 3. Smoothing Duration Slider (WINDOW_MS) -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/smoothing_duration"
+                    android:textSize="14sp"
+                    android:layout_marginBottom="4dp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="12dp">
+
+                    <SeekBar
+                        android:id="@+id/slider_smoothing_duration"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:max="9"
+                        android:progress="5"
+                        android:layout_marginEnd="12dp" />
+
+                    <EditText
+                        android:id="@+id/et_smoothing_duration_value"
+                        android:layout_width="60dp"
+                        android:layout_height="wrap_content"
+                        android:background="@android:drawable/editbox_background"
+                        android:textColor="@android:color/black"
+                        android:gravity="center"
+                        android:maxLength="4"
+                        android:paddingLeft="8dp"
+                        android:paddingRight="8dp"
+                        android:paddingTop="6dp"
+                        android:paddingBottom="6dp"
+                        android:inputType="number"
+                        android:singleLine="true"
+                        android:editable="false"
+                        android:text="3000" />
+                </LinearLayout>
+
+                <!-- 4. Quick React (Lux) Slider -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/quick_react_lux"
+                    android:textSize="14sp"
+                    android:layout_marginBottom="4dp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="12dp">
+
+                    <SeekBar
+                        android:id="@+id/slider_quick_react_lux"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:max="8"
+                        android:progress="4"
+                        android:layout_marginEnd="12dp" />
+
+                    <EditText
+                        android:id="@+id/et_quick_react_lux_value"
+                        android:layout_width="60dp"
+                        android:layout_height="wrap_content"
+                        android:background="@android:drawable/editbox_background"
+                        android:textColor="@android:color/black"
+                        android:gravity="center"
+                        android:maxLength="3"
+                        android:paddingLeft="8dp"
+                        android:paddingRight="8dp"
+                        android:paddingTop="6dp"
+                        android:paddingBottom="6dp"
+                        android:inputType="number"
+                        android:singleLine="true"
+                        android:editable="false"
+                        android:text="50" />
+                </LinearLayout>
+
+                <!-- 5. Quick React (Percent) Slider -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/quick_react_percent"
+                    android:textSize="14sp"
+                    android:layout_marginBottom="4dp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="16dp">
+
+                    <SeekBar
+                        android:id="@+id/slider_quick_react_percent"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:max="12"
+                        android:progress="6"
+                        android:layout_marginEnd="12dp" />
+
+                    <EditText
+                        android:id="@+id/et_quick_react_percent_value"
+                        android:layout_width="60dp"
+                        android:layout_height="wrap_content"
+                        android:background="@android:drawable/editbox_background"
+                        android:textColor="@android:color/black"
+                        android:gravity="center"
+                        android:maxLength="2"
+                        android:paddingLeft="8dp"
+                        android:paddingRight="8dp"
+                        android:paddingTop="6dp"
+                        android:paddingBottom="6dp"
+                        android:inputType="number"
+                        android:singleLine="true"
+                        android:editable="false"
+                        android:text="50" />
+                </LinearLayout>
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
