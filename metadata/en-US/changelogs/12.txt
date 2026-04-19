@@ -1,0 +1,1 @@
+- Adding possibility to fine-tune Adaptive Brightness Algorithm parameters that will allow power users controlling brightness adjustment sensitivity, smoothing, and quick-reaction thresholds via discrete sliders.
