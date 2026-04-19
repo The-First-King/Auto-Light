@@ -74,6 +74,13 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp"
+                    android:background="#808080" />
+
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -348,7 +355,6 @@
                     android:text="@string/fine_tuning_section"
                     android:textSize="16sp"
                     android:textStyle="bold"
-                    android:layout_marginTop="8dp"
                     android:layout_marginBottom="12dp" />
 
                 <!-- 1. Sensitivity Slider (HYSTERESIS_THRESHOLD) -->
@@ -532,7 +538,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:layout_marginBottom="16dp">
+                    android:layout_marginBottom="12dp">
 
                     <SeekBar
                         android:id="@+id/slider_quick_react_percent"
@@ -565,7 +571,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:gravity="center_horizontal">
+                    android:gravity="center_horizontal"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp">
 
                     <Button
                         android:id="@+id/btn_save_settings"
