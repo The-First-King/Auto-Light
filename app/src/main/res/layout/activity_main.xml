@@ -392,6 +392,7 @@
                         android:singleLine="true"
                         android:editable="false"
 						android:cursorVisible="false"
+						android:focusable="false"
                         android:text="0.15" />
                 </LinearLayout>
 
@@ -435,6 +436,7 @@
                         android:singleLine="true"
                         android:editable="false"
 						android:cursorVisible="false"
+						android:focusable="false"
                         android:text="5" />
                 </LinearLayout>
 
@@ -478,6 +480,7 @@
                         android:singleLine="true"
                         android:editable="false"
 						android:cursorVisible="false"
+						android:focusable="false"
                         android:text="3000" />
                 </LinearLayout>
 
@@ -521,6 +524,7 @@
                         android:singleLine="true"
                         android:editable="false"
 						android:cursorVisible="false"
+						android:focusable="false"
                         android:text="50" />
                 </LinearLayout>
 
@@ -564,6 +568,7 @@
                         android:singleLine="true"
                         android:editable="false"
 						android:cursorVisible="false"
+						android:focusable="false"
                         android:text="50" />
                 </LinearLayout>
 
