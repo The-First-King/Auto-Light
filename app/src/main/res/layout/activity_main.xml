@@ -63,8 +63,9 @@
             <Button
                 android:id="@+id/btn_expand"
                 android:layout_width="match_parent"
-                android:layout_height="34sp"
-                android:layout_marginTop="10dp" 
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp"
                 android:text="@string/show_config"
                 android:textSize="11sp" />
 
@@ -72,7 +73,6 @@
                 android:id="@+id/ll_hidden_settings"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
                 android:orientation="vertical">
 
                 <LinearLayout
@@ -111,8 +111,7 @@
                         android:paddingBottom="6dp"
                         android:importantForAutofill="no"
                         android:inputType="number"
-                        android:singleLine="true"
-                        android:text="" />
+                        android:singleLine="true" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -136,8 +135,7 @@
                         android:paddingBottom="6dp"
                         android:importantForAutofill="no"
                         android:inputType="number"
-                        android:singleLine="true"
-                        android:text="" />
+                        android:singleLine="true" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -176,8 +174,7 @@
                         android:paddingBottom="6dp"
                         android:importantForAutofill="no"
                         android:inputType="number"
-                        android:singleLine="true"
-                        android:text="" />
+                        android:singleLine="true" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -201,8 +198,7 @@
                         android:paddingBottom="6dp"
                         android:importantForAutofill="no"
                         android:inputType="number"
-                        android:singleLine="true"
-                        android:text="" />
+                        android:singleLine="true" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -241,8 +237,7 @@
                         android:paddingBottom="6dp"
                         android:importantForAutofill="no"
                         android:inputType="number"
-                        android:singleLine="true"
-                        android:text="" />
+                        android:singleLine="true" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -266,8 +261,7 @@
                         android:paddingBottom="6dp"
                         android:importantForAutofill="no"
                         android:inputType="number"
-                        android:singleLine="true"
-                        android:text="" />
+                        android:singleLine="true" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -275,7 +269,8 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
                     android:orientation="horizontal"
-                    android:gravity="center_vertical">
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="10dp">
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -306,8 +301,7 @@
                         android:paddingBottom="6dp"
                         android:importantForAutofill="no"
                         android:inputType="number"
-                        android:singleLine="true"
-                        android:text="" />
+                        android:singleLine="true" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -331,8 +325,7 @@
                         android:paddingBottom="6dp"
                         android:importantForAutofill="no"
                         android:inputType="number"
-                        android:singleLine="true"
-                        android:text="" />
+                        android:singleLine="true" />
                 </LinearLayout>
 
                 <View
@@ -562,7 +555,7 @@
                     android:orientation="horizontal"
                     android:gravity="center_horizontal"
                     android:layout_marginTop="10dp"
-                    android:layout_marginBottom="0dp">
+                    android:layout_marginBottom="10dp">
 
                     <Button
                         android:id="@+id/btn_save_settings"
