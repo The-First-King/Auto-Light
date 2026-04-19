@@ -65,7 +65,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="34sp"
                 android:layout_marginTop="5dp"
-                android:layout_marginBottom="10dp"
                 android:text="@string/show_config"
                 android:textSize="11sp" />
 
