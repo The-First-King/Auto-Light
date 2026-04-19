@@ -58,15 +58,13 @@
                 android:id="@+id/btn_get_state"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
                 android:text="@string/get_data" />
 
             <Button
                 android:id="@+id/btn_expand"
                 android:layout_width="match_parent"
-                android:layout_height="34dp"
-                android:layout_marginTop="10dp"
-                android:layout_marginBottom="10dp"
+                android:layout_height="34sp"
+                android:layout_marginTop="5dp"
                 android:text="@string/show_config"
                 android:textSize="11sp" />
 
@@ -74,8 +72,7 @@
                 android:id="@+id/ll_hidden_settings"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:visibility="gone">
+                android:orientation="vertical">
 
                 <LinearLayout
                     android:layout_width="wrap_content"
@@ -113,7 +110,8 @@
                         android:paddingBottom="6dp"
                         android:importantForAutofill="no"
                         android:inputType="number"
-                        android:singleLine="true" />
+                        android:singleLine="true"
+                        android:text="" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -137,7 +135,8 @@
                         android:paddingBottom="6dp"
                         android:importantForAutofill="no"
                         android:inputType="number"
-                        android:singleLine="true" />
+                        android:singleLine="true"
+                        android:text="" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -176,7 +175,8 @@
                         android:paddingBottom="6dp"
                         android:importantForAutofill="no"
                         android:inputType="number"
-                        android:singleLine="true" />
+                        android:singleLine="true"
+                        android:text="" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -200,7 +200,8 @@
                         android:paddingBottom="6dp"
                         android:importantForAutofill="no"
                         android:inputType="number"
-                        android:singleLine="true" />
+                        android:singleLine="true"
+                        android:text="" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -239,7 +240,8 @@
                         android:paddingBottom="6dp"
                         android:importantForAutofill="no"
                         android:inputType="number"
-                        android:singleLine="true" />
+                        android:singleLine="true"
+                        android:text="" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -263,7 +265,8 @@
                         android:paddingBottom="6dp"
                         android:importantForAutofill="no"
                         android:inputType="number"
-                        android:singleLine="true" />
+                        android:singleLine="true"
+                        android:text="" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -302,7 +305,8 @@
                         android:paddingBottom="6dp"
                         android:importantForAutofill="no"
                         android:inputType="number"
-                        android:singleLine="true" />
+                        android:singleLine="true"
+                        android:text="" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -326,7 +330,8 @@
                         android:paddingBottom="6dp"
                         android:importantForAutofill="no"
                         android:inputType="number"
-                        android:singleLine="true" />
+                        android:singleLine="true"
+                        android:text="" />
                 </LinearLayout>
 
                 <View
@@ -336,14 +341,17 @@
                     android:layout_marginBottom="10dp"
                     android:background="#808080" />
 
+                <!-- Adaptive Brightness Fine-Tuning Section -->
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/fine_tuning_section"
                     android:textSize="16sp"
                     android:textStyle="bold"
-                    android:layout_marginBottom="10dp" />
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="12dp" />
 
+                <!-- 1. Sensitivity Slider (HYSTERESIS_THRESHOLD) -->
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -356,7 +364,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:layout_marginBottom="10dp">
+                    android:layout_marginBottom="12dp">
 
                     <SeekBar
                         android:id="@+id/slider_sensitivity"
@@ -385,6 +393,7 @@
                         android:text="0.15" />
                 </LinearLayout>
 
+                <!-- 2. Minimum Change Slider (ABSOLUTE_THRESHOLD) -->
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -397,7 +406,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:layout_marginBottom="10dp">
+                    android:layout_marginBottom="12dp">
 
                     <SeekBar
                         android:id="@+id/slider_minimum_change"
@@ -426,6 +435,7 @@
                         android:text="5" />
                 </LinearLayout>
 
+                <!-- 3. Smoothing Duration Slider (WINDOW_MS) -->
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -438,7 +448,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:layout_marginBottom="10dp">
+                    android:layout_marginBottom="12dp">
 
                     <SeekBar
                         android:id="@+id/slider_smoothing_duration"
@@ -467,6 +477,7 @@
                         android:text="3000" />
                 </LinearLayout>
 
+                <!-- 4. Quick React (Lux) Slider -->
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -479,7 +490,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:layout_marginBottom="10dp">
+                    android:layout_marginBottom="12dp">
 
                     <SeekBar
                         android:id="@+id/slider_quick_react_lux"
@@ -508,6 +519,7 @@
                         android:text="50" />
                 </LinearLayout>
 
+                <!-- 5. Quick React (Percent) Slider -->
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -520,7 +532,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:layout_marginBottom="10dp">
+                    android:layout_marginBottom="16dp">
 
                     <SeekBar
                         android:id="@+id/slider_quick_react_percent"
@@ -553,8 +565,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:gravity="center_horizontal"
-                    android:layout_marginTop="10dp">
+                    android:gravity="center_horizontal">
 
                     <Button
                         android:id="@+id/btn_save_settings"
