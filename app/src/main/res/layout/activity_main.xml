@@ -65,6 +65,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="34sp"
                 android:layout_marginTop="5dp"
+                android:layout_marginBottom="10dp"
                 android:text="@string/show_config"
                 android:textSize="11sp" />
 
@@ -73,13 +74,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:layout_marginTop="10dp"
-                    android:layout_marginBottom="10dp"
-                    android:background="#808080" />
 
                 <LinearLayout
                     android:layout_width="wrap_content"
@@ -355,7 +349,8 @@
                     android:text="@string/fine_tuning_section"
                     android:textSize="16sp"
                     android:textStyle="bold"
-                    android:layout_marginBottom="12dp" />
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp" />
 
                 <!-- 1. Sensitivity Slider (HYSTERESIS_THRESHOLD) -->
                 <TextView
@@ -370,7 +365,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:layout_marginBottom="12dp">
+                    android:layout_marginBottom="10dp">
 
                     <SeekBar
                         android:id="@+id/slider_sensitivity"
@@ -412,7 +407,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:layout_marginBottom="12dp">
+                    android:layout_marginBottom="10dp">
 
                     <SeekBar
                         android:id="@+id/slider_minimum_change"
@@ -454,7 +449,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:layout_marginBottom="12dp">
+                    android:layout_marginBottom="10dp">
 
                     <SeekBar
                         android:id="@+id/slider_smoothing_duration"
@@ -496,7 +491,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:layout_marginBottom="12dp">
+                    android:layout_marginBottom="10dp">
 
                     <SeekBar
                         android:id="@+id/slider_quick_react_lux"
@@ -538,7 +533,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:layout_marginBottom="12dp">
+                    android:layout_marginBottom="10dp">
 
                     <SeekBar
                         android:id="@+id/slider_quick_react_percent"
