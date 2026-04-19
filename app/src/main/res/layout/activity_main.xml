@@ -391,6 +391,7 @@
                         android:inputType="number"
                         android:singleLine="true"
                         android:editable="false"
+						android:cursorVisible="false"
                         android:text="0.15" />
                 </LinearLayout>
 
@@ -433,6 +434,7 @@
                         android:inputType="number"
                         android:singleLine="true"
                         android:editable="false"
+						android:cursorVisible="false"
                         android:text="5" />
                 </LinearLayout>
 
@@ -475,6 +477,7 @@
                         android:inputType="number"
                         android:singleLine="true"
                         android:editable="false"
+						android:cursorVisible="false"
                         android:text="3000" />
                 </LinearLayout>
 
@@ -517,6 +520,7 @@
                         android:inputType="number"
                         android:singleLine="true"
                         android:editable="false"
+						android:cursorVisible="false"
                         android:text="50" />
                 </LinearLayout>
 
@@ -559,6 +563,7 @@
                         android:inputType="number"
                         android:singleLine="true"
                         android:editable="false"
+						android:cursorVisible="false"
                         android:text="50" />
                 </LinearLayout>
 
