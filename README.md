@@ -14,8 +14,6 @@ The app utilizes a four-point non-linear mapping model to create a smooth bright
 <img src="https://github.com/The-First-King/Auto-Light/blob/master/metadata/en-US/images/phoneScreenshots/01.png?raw=true" alt="App settings" width="405" />
 </div>
 
-The main intended working mode is “On screen unlock/rotate” where the app captures ambient light data only during specific triggers (like unlocking or rotating). This sets your brightness once, preventing the “flickering” or “hunting” common with standard auto-brightness.
-
 The Auto Light app utilizes Android’s notification system to ensure stable background performance. Since the app does not send active alerts or messages, you may choose to disable notifications in your Android system settings without affecting core functionality. To do this within the app, tap the **three dots** in the top-right corner, go to **Settings**, and ensure **Notifications** is toggled off.
 
 ## Permissions & Privacy
