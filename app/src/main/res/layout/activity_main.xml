@@ -80,7 +80,7 @@
                     android:layout_gravity="center_horizontal"
                     android:orientation="horizontal"
 					android:gravity="center_vertical"
-					android:layout_marginTop="10dp">
+					android:layout_marginTop="5dp">
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -365,7 +365,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:layout_marginBottom="12dp">
+                    android:layout_marginBottom="10dp">
 
                     <SeekBar
                         android:id="@+id/slider_sensitivity"
@@ -407,7 +407,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:layout_marginBottom="12dp">
+                    android:layout_marginBottom="10dp">
 
                     <SeekBar
                         android:id="@+id/slider_minimum_change"
@@ -449,7 +449,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:layout_marginBottom="12dp">
+                    android:layout_marginBottom="10dp">
 
                     <SeekBar
                         android:id="@+id/slider_smoothing_duration"
@@ -491,7 +491,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:layout_marginBottom="12dp">
+                    android:layout_marginBottom="10dp">
 
                     <SeekBar
                         android:id="@+id/slider_quick_react_lux"
