@@ -63,7 +63,7 @@
             <Button
                 android:id="@+id/btn_expand"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="34dp"
                 android:layout_marginTop="10dp"
                 android:layout_marginBottom="10dp"
                 android:text="@string/show_config"
@@ -73,7 +73,8 @@
                 android:id="@+id/ll_hidden_settings"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:visibility="gone">
 
                 <LinearLayout
                     android:layout_width="wrap_content"
@@ -269,8 +270,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
                     android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:layout_marginBottom="10dp">
+                    android:gravity="center_vertical">
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -341,7 +341,6 @@
                     android:text="@string/fine_tuning_section"
                     android:textSize="16sp"
                     android:textStyle="bold"
-                    android:layout_marginTop="0dp"
                     android:layout_marginBottom="10dp" />
 
                 <TextView
@@ -555,7 +554,7 @@
                     android:orientation="horizontal"
                     android:gravity="center_horizontal"
                     android:layout_marginTop="10dp"
-                    android:layout_marginBottom="10dp">
+                    android:layout_marginBottom="0dp">
 
                     <Button
                         android:id="@+id/btn_save_settings"
