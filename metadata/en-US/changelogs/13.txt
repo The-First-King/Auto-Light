@@ -1,0 +1,1 @@
+Enhanced brightness level handling: the minimum brightness setting now correctly corresponds to level 1 (the minimum level), which may be useful in the total darkness.
