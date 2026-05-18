@@ -206,7 +206,13 @@ public class LightControl implements SensorEventListener {
             systemMax = context.getResources().getInteger(resId);
         }
 
-        int finalSystemValue = Math.round((brightnessPercent / 100.0f) * systemMax);
+        int finalSystemValue;
+
+        if (brightnessPercent <= 1) {
+            finalSystemValue = 1;
+        } else {
+            finalSystemValue = Math.round((brightnessPercent / 100.0f) * systemMax);
+        }
 
         finalSystemValue = Math.max(1, Math.min(systemMax, finalSystemValue));
 
