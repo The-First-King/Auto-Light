@@ -201,10 +201,6 @@ public class LightControl implements SensorEventListener {
         tempBrightness = brightnessPercent;
 
         int systemMax = 255;
-        int resId = context.getResources().getIdentifier("config_screenBrightnessSettingMaximum", "integer", "android");
-        if (resId > 0) {
-            systemMax = context.getResources().getInteger(resId);
-        }
 
         int finalSystemValue;
 
