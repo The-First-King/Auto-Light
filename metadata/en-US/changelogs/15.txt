@@ -1,0 +1,1 @@
+- Enhanced the foreground service configuration to ensure persistent background operation on Android 15+.
