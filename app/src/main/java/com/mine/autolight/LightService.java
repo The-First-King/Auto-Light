@@ -108,15 +108,16 @@ public class LightService extends Service {
                         : new Notification.Builder(this);
 
         Notification notification = builder
-				.setContentTitle(getString(R.string.notification_title))
-				.setContentText(getString(R.string.notification_text))
-				.setSmallIcon(R.drawable.brightness_auto_24px)
+                .setContentTitle(getString(R.string.notification_title))
+                .setContentText(getString(R.string.notification_text))
+                .setSmallIcon(R.drawable.brightness_auto_24px)
                 .setOngoing(true)
                 .build();
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            startForeground(NOTIFICATION_ID, notification,
-                    ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC);
+        if (Build.VERSION.SDK_INT >= 34) {
+            startForeground(NOTIFICATION_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE);
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            startForeground(NOTIFICATION_ID, notification, 0); 
         } else {
             startForeground(NOTIFICATION_ID, notification);
         }
@@ -155,8 +156,8 @@ public class LightService extends Service {
         super.onDestroy();
     }
 
-	@Override
-	public IBinder onBind(Intent intent) {
-		return null;
-	}
+    @Override
+    public IBinder onBind(Intent intent) {
+        return null;
+    }
 }
