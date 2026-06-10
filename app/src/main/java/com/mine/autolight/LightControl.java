@@ -61,7 +61,7 @@ public class LightControl implements SensorEventListener {
     private long getDynamicWindow(int level) {
         switch (level) {
             case 0: return 500;   // Low
-            case 1: return 2000;  // Medium
+            case 1: return 2000;  // Med
             case 2: return 5000;  // High
             default: return 2000;
         }
