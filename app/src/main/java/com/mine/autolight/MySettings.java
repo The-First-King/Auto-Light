@@ -16,6 +16,9 @@ public class MySettings {
     public int windowMs;
     public int quickReactLux;
     public int quickReactPercent;
+    
+    // Environment Filtering Level (0=Low, 1=Medium, 2=High)
+    public int envFilterLevel; 
 
     MySettings(Context context) {
         this.context = context;
@@ -26,14 +29,14 @@ public class MySettings {
         sharedPref = context.getSharedPreferences(Constants.SETTINGS_PREFS_NAME, Context.MODE_PRIVATE);
 
         l1 = sharedPref.getInt("l1", 1);
-        l2 = sharedPref.getInt("l2", 100);
-        l3 = sharedPref.getInt("l3", 1000);
-        l4 = sharedPref.getInt("l4", 10000);
+        l2 = sharedPref.getInt("l2", 1000);
+        l3 = sharedPref.getInt("l3", 10000);
+        l4 = sharedPref.getInt("l4", 100000);
 
         b1 = sharedPref.getInt("b1", 1);
-        b2 = sharedPref.getInt("b2", 10);
+        b2 = sharedPref.getInt("b2", 15);
         b3 = sharedPref.getInt("b3", 30);
-        b4 = sharedPref.getInt("b4", 90);
+        b4 = sharedPref.getInt("b4", 60);
 
         mode = sharedPref.getInt("mode", Constants.WORK_MODE_UNLOCK);
         
@@ -42,6 +45,7 @@ public class MySettings {
         windowMs = sharedPref.getInt("windowMs", 3000);
         quickReactLux = sharedPref.getInt("quickReactLux", 50);
         quickReactPercent = sharedPref.getInt("quickReactPercent", 50);
+        envFilterLevel = sharedPref.getInt("envFilterLevel", 1); 
     }
 
     public void save() {
@@ -64,7 +68,27 @@ public class MySettings {
         editor.putInt("windowMs", windowMs);
         editor.putInt("quickReactLux", quickReactLux);
         editor.putInt("quickReactPercent", quickReactPercent);
+        editor.putInt("envFilterLevel", envFilterLevel);
 
         editor.apply();
+    }
+
+    // Helpers for LightControl
+    public long getMedianWindowMs() {
+        switch (envFilterLevel) {
+            case 0: return 1000; // Low
+            case 2: return 3000; // High
+            case 1: 
+            default: return 2000; // Medium
+        }
+    }
+
+    public long getDebounceMs() {
+        switch (envFilterLevel) {
+            case 0: return 600;  // Low
+            case 2: return 2000; // High
+            case 1: 
+            default: return 1200; // Medium
+        }
     }
 }
