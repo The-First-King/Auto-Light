@@ -27,6 +27,5 @@
     <string name="smoothing_duration">Smoothing Duration: longer means smoother, but slower response.</string>
     <string name="quick_react_lux">Quick React (Lux): bypass smoothing if brightness changes by this value.</string>
     <string name="quick_react_percent">Quick React (%): bypass smoothing if brightness changes by this percentage.</string>
-	<string name="env_filtering">Environment Filtering</string>
-    <string name="env_filter_desc">Adjusts spike rejection (Low/Med/High). Higher settings filter more noise but react slower.</string>
+	<string name="env_filtering">Environment Filtering: adjusts spike rejection (Low/Med/High).</string>
 </resources>
