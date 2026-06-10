@@ -17,7 +17,7 @@ public class MySettings {
     public int quickReactLux;
     public int quickReactPercent;
     
-    // Environment Filtering Level (0=Low, 1=Medium, 2=High)
+    // Environment Filtering Level (0=Low, 1=Med, 2=High)
     public int envFilterLevel; 
 
     MySettings(Context context) {
@@ -79,7 +79,7 @@ public class MySettings {
             case 0: return 1000; // Low
             case 2: return 3000; // High
             case 1: 
-            default: return 2000; // Medium
+            default: return 2000; // Med
         }
     }
 
@@ -88,7 +88,7 @@ public class MySettings {
             case 0: return 600;  // Low
             case 2: return 2000; // High
             case 1: 
-            default: return 1200; // Medium
+            default: return 1200; // Med
         }
     }
 }
