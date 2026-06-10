@@ -25,8 +25,10 @@ public class MainActivity extends Activity {
     // Fine-tuning sliders and value fields
     private SeekBar sliderSensitivity, sliderMinimumChange, sliderSmoothingDuration;
     private SeekBar sliderQuickReactLux, sliderQuickReactPercent;
+    private SeekBar sliderEnvFilter;
     private EditText etSensitivityValue, etMinimumChangeValue, etSmoothingDurationValue;
     private EditText etQuickReactLuxValue, etQuickReactPercentValue;
+    private EditText etEnvFilterValue;
     
     private MySettings sett;
     private boolean isExpanded = false;
@@ -98,6 +100,7 @@ public class MainActivity extends Activity {
         sliderSmoothingDuration = findViewById(R.id.slider_smoothing_duration);
         sliderQuickReactLux = findViewById(R.id.slider_quick_react_lux);
         sliderQuickReactPercent = findViewById(R.id.slider_quick_react_percent);
+        sliderEnvFilter = findViewById(R.id.slider_env_filter);
 
         // Fine-tuning value fields
         etSensitivityValue = findViewById(R.id.et_sensitivity_value);
@@ -105,6 +108,7 @@ public class MainActivity extends Activity {
         etSmoothingDurationValue = findViewById(R.id.et_smoothing_duration_value);
         etQuickReactLuxValue = findViewById(R.id.et_quick_react_lux_value);
         etQuickReactPercentValue = findViewById(R.id.et_quick_react_percent_value);
+        etEnvFilterValue = findViewById(R.id.et_env_filter_value);
 
         refillCollapsibleSettings();
 
@@ -169,6 +173,16 @@ public class MainActivity extends Activity {
             public void onStopTrackingTouch(SeekBar seekBar) {}
         });
 
+        sliderEnvFilter.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                String[] levels = {"Low", "Medium", "High"};
+                etEnvFilterValue.setText(levels[progress]);
+            }
+            @Override public void onStartTrackingTouch(SeekBar seekBar) {}
+            @Override public void onStopTrackingTouch(SeekBar seekBar) {}
+        });
+
         Button btnSave = findViewById(R.id.btn_save_settings);
         btnSave.setOnClickListener(v -> {
             if (validateAndSaveSettings()) {
@@ -215,7 +229,8 @@ public class MainActivity extends Activity {
                 showErrorDialog("1) Sensor must be between " + SENSOR_MIN + " and " + SENSOR_MAX);
                 return false;
             }
-            if (!isValidSensorValue(l2)) {
+			
+			if (!isValidSensorValue(l2)) {
                 showErrorDialog("2) Sensor must be between " + SENSOR_MIN + " and " + SENSOR_MAX);
                 return false;
             }
@@ -271,6 +286,7 @@ public class MainActivity extends Activity {
             sett.windowMs = 500 + (sliderSmoothingDuration.getProgress() * 500);
             sett.quickReactLux = 20 + (sliderQuickReactLux.getProgress() * 10);
             sett.quickReactPercent = 20 + (sliderQuickReactPercent.getProgress() * 5);
+            sett.envFilterLevel = sliderEnvFilter.getProgress();
 
             sett.save();
             return true;
@@ -425,6 +441,7 @@ public class MainActivity extends Activity {
         sliderSmoothingDuration.setProgress((sett.windowMs - 500) / 500);
         sliderQuickReactLux.setProgress((sett.quickReactLux - 20) / 10);
         sliderQuickReactPercent.setProgress((sett.quickReactPercent - 20) / 5);
+        sliderEnvFilter.setProgress(sett.envFilterLevel);
 
         // Update display values
         etSensitivityValue.setText(String.format("%.2f", sett.hysteresisThreshold));
@@ -432,5 +449,8 @@ public class MainActivity extends Activity {
         etSmoothingDurationValue.setText(String.valueOf(sett.windowMs));
         etQuickReactLuxValue.setText(String.valueOf(sett.quickReactLux));
         etQuickReactPercentValue.setText(String.valueOf(sett.quickReactPercent));
+        
+        String[] levels = {"Low", "Medium", "High"};
+        etEnvFilterValue.setText(levels[Math.max(0, Math.min(2, sett.envFilterLevel))]);
     }
 }
