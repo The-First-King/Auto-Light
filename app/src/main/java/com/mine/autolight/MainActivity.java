@@ -176,7 +176,7 @@ public class MainActivity extends Activity {
         sliderEnvFilter.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                String[] levels = {"Low", "Medium", "High"};
+                String[] levels = {"Low", "Med", "High"};
                 etEnvFilterValue.setText(levels[progress]);
             }
             @Override public void onStartTrackingTouch(SeekBar seekBar) {}
@@ -450,7 +450,7 @@ public class MainActivity extends Activity {
         etQuickReactLuxValue.setText(String.valueOf(sett.quickReactLux));
         etQuickReactPercentValue.setText(String.valueOf(sett.quickReactPercent));
         
-        String[] levels = {"Low", "Medium", "High"};
+        String[] levels = {"Low", "Med", "High"};
         etEnvFilterValue.setText(levels[Math.max(0, Math.min(2, sett.envFilterLevel))]);
     }
 }
