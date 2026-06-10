@@ -10,7 +10,12 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
 import android.provider.Settings;
+
 import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 
 public class LightControl implements SensorEventListener {
 
@@ -20,7 +25,7 @@ public class LightControl implements SensorEventListener {
     private final ContentResolver cResolver;
     private final Context context;
 
-    // Used only to schedule stopListening after "pause" in non-always modes
+	// Used only to schedule stopListening after "pause" in non-always modes
     private final Handler delayer = new Handler(Looper.getMainLooper());
     private final long pause = 2500;
 
@@ -31,11 +36,15 @@ public class LightControl implements SensorEventListener {
     private float lux = 0;
     private int tempBrightness = 0;
 
-    // Window smoothing settings
+	// Window smoothing settings
     private final ArrayDeque<SensorReading> buffer = new ArrayDeque<>();
-
     private float lastAppliedLux = -1f;
     private float rollingSum = 0f;
+
+    private MedianFilter medianFilter; 
+    private long quickReactTriggerTime = 0;
+    private long quickReactDebounceMs; 
+    private boolean isQuickReactPending = false;
 
     LightControl(Context context) {
         this.context = context;
@@ -43,6 +52,19 @@ public class LightControl implements SensorEventListener {
         cResolver = context.getContentResolver();
         sMgr = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
         lightSensor = sMgr.getDefaultSensor(Sensor.TYPE_LIGHT);
+        
+        // Use the new mapping logic
+        medianFilter = new MedianFilter(getDynamicWindow(sett.envFilterLevel));
+        quickReactDebounceMs = sett.getDebounceMs();
+    }
+
+    private long getDynamicWindow(int level) {
+        switch (level) {
+            case 0: return 500;   // Low
+            case 1: return 2000;  // Medium
+            case 2: return 5000;  // High
+            default: return 2000;
+        }
     }
 
     @Override
@@ -52,26 +74,37 @@ public class LightControl implements SensorEventListener {
     public void onSensorChanged(SensorEvent event) {
         if (event.sensor.getType() != Sensor.TYPE_LIGHT) return;
 
-        float rawLux = event.values[0];
         long now = SystemClock.elapsedRealtime();
+        float filteredLux = medianFilter.filter(event.values[0], now);
 
         if (lastAppliedLux != -1f && !needsImmediateUpdate) {
-            float gap = Math.abs(rawLux - lastAppliedLux);
+            float gap = Math.abs(filteredLux - lastAppliedLux);
             float percentChange = (lastAppliedLux == 0f) ? 100f : (gap / lastAppliedLux) * 100f;
             
-            // If the ambient sensor data gap is significant, react immediately
+			// Debounced Quick React processing
             if (gap > sett.quickReactLux && percentChange > sett.quickReactPercent) {
-                // Clear old data and apply new brightness instantly
-                buffer.clear();
-                buffer.addLast(new SensorReading(now, rawLux));
-                rollingSum = rawLux;
-                applyAndRecord(rawLux);
-                return;
+                if (!isQuickReactPending) {
+                    quickReactTriggerTime = now;
+                    isQuickReactPending = true;
+                } else if (now - quickReactTriggerTime >= quickReactDebounceMs) {
+					// If the massive change has sustained, clear smoothing buffer and snap immediately.
+                    buffer.clear();
+                    buffer.addLast(new SensorReading(now, filteredLux));
+                    rollingSum = filteredLux;
+                    applyAndRecord(filteredLux);
+                    isQuickReactPending = false;
+                    return;
+                }
+            } else {
+                isQuickReactPending = false;
             }
+        } else {
+            isQuickReactPending = false;
         }
 
-        buffer.addLast(new SensorReading(now, rawLux));
-        rollingSum += rawLux;
+		// Standard Window Smoothing using the Filtered Lux
+        buffer.addLast(new SensorReading(now, filteredLux));
+        rollingSum += filteredLux;
 
         while (!buffer.isEmpty() && (now - buffer.peekFirst().time) > sett.windowMs) {
             SensorReading old = buffer.removeFirst();
@@ -79,7 +112,7 @@ public class LightControl implements SensorEventListener {
         }
 
         if (needsImmediateUpdate || sett.mode == Constants.WORK_MODE_UNLOCK) {
-            lux = rawLux;
+            lux = filteredLux;
             setBrightness((int) lux);
 
             if (sett.mode == Constants.WORK_MODE_UNLOCK) {
@@ -97,7 +130,7 @@ public class LightControl implements SensorEventListener {
     private void processSmoothedLux() {
         if (buffer.isEmpty()) return;
 
-        // First apply: use last sample immediately
+		// First apply: use last sample immediately
         if (lastAppliedLux == -1f) {
             lux = buffer.peekLast().value;
             applyAndRecord(lux);
@@ -107,7 +140,7 @@ public class LightControl implements SensorEventListener {
         float averageLux = rollingSum / buffer.size();
         float diff = Math.abs(averageLux - lastAppliedLux);
 
-        // Update if diff > (hysteresis% of lastAppliedLux) OR diff > absoluteThreshold
+		// Update if diff > (hysteresis% of lastAppliedLux) OR diff > absoluteThreshold
         if (diff > (lastAppliedLux * sett.hysteresisThreshold) || diff > sett.absoluteThreshold) {
             lux = averageLux;
             applyAndRecord(lux);
@@ -125,6 +158,9 @@ public class LightControl implements SensorEventListener {
 
         buffer.clear();
         rollingSum = 0f;
+        
+        medianFilter.clear();
+        isQuickReactPending = false;
     }
 
     private void scheduleSuspend() {
@@ -157,6 +193,9 @@ public class LightControl implements SensorEventListener {
                     lastAppliedLux = -1f;
                     buffer.clear();
                     rollingSum = 0f;
+                    
+                    medianFilter.clear();
+                    isQuickReactPending = false;
                 }
                 sMgr.registerListener(this, lightSensor, SensorManager.SENSOR_DELAY_NORMAL);
                 onListen = true;
@@ -201,7 +240,6 @@ public class LightControl implements SensorEventListener {
         tempBrightness = brightnessPercent;
 
         int systemMax = 255;
-
         int finalSystemValue;
 
         if (brightnessPercent <= 1) {
@@ -220,6 +258,11 @@ public class LightControl implements SensorEventListener {
     public void reconfigure() {
         stopListening();
         sett.load();
+        
+        // Update algorithm constraints dynamically using the new mapping
+        medianFilter = new MedianFilter(getDynamicWindow(sett.envFilterLevel));
+        quickReactDebounceMs = sett.getDebounceMs();
+        
         startListening();
     }
 
@@ -251,6 +294,40 @@ public class LightControl implements SensorEventListener {
         SensorReading(long time, float value) {
             this.time = time;
             this.value = value;
+        }
+    }
+
+    private static class MedianFilter {
+        private final long windowDurationMs;
+        private final LinkedList<SensorReading> window = new LinkedList<>();
+
+        MedianFilter(long windowDurationMs) {
+            this.windowDurationMs = windowDurationMs;
+        }
+
+        float filter(float newValue, long currentTime) {
+            window.addLast(new SensorReading(currentTime, newValue));
+
+            while (!window.isEmpty() && (currentTime - window.peekFirst().time) > windowDurationMs) {
+                window.removeFirst();
+            }
+
+            List<Float> sortedValues = new ArrayList<>(window.size());
+            for (SensorReading reading : window) {
+                sortedValues.add(reading.value);
+            }
+            Collections.sort(sortedValues);
+
+            int middle = sortedValues.size() / 2;
+            if (sortedValues.size() % 2 == 1) {
+                return sortedValues.get(middle);
+            } else {
+                return (sortedValues.get(middle - 1) + sortedValues.get(middle)) / 2.0f;
+            }
+        }
+        
+        void clear() {
+            window.clear();
         }
     }
 }
