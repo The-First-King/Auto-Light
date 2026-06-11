@@ -201,11 +201,23 @@ public class LightControl implements SensorEventListener {
             t = Math.max(0.0, Math.min(1.0, t));
             brightnessPercent = (int) Math.round(y1 + (y2 - y1) * t);
         }
+
+        // Force minimum if at the lowest setting
+        if (brightnessPercent <= 1) {
+            setSystemBrightness(1);
+            tempBrightness = brightnessPercent;
+            return;
+        }
+
         tempBrightness = brightnessPercent;
         int finalSystemValue = Math.max(1, Math.min(255, Math.round((brightnessPercent / 100.0f) * 255)));
-        try { Settings.System.putInt(cResolver, Settings.System.SCREEN_BRIGHTNESS, finalSystemValue); } catch (Exception ignored) { }
+        setSystemBrightness(finalSystemValue);
     }
 
+    private void setSystemBrightness(int value) {
+        try { Settings.System.putInt(cResolver, Settings.System.SCREEN_BRIGHTNESS, value); } catch (Exception ignored) { }
+	}
+	
     public void reconfigure() {
         stopListening();
         sett.load();
@@ -222,13 +234,8 @@ public class LightControl implements SensorEventListener {
         startListening();
     }
 
-    public int getLastSensorValue() {
-        return (int) lux;
-    }
-
-    public int getSetBrightness() {
-        return tempBrightness;
-    }
+    public int getLastSensorValue() { return (int) lux; }
+    public int getSetBrightness() { return tempBrightness; }
 
     private static class SensorReading {
         final long time; final float value;
