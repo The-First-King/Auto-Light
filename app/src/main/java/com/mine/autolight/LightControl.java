@@ -52,6 +52,7 @@ public class LightControl implements SensorEventListener {
         cResolver = context.getContentResolver();
         sMgr = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
         lightSensor = sMgr.getDefaultSensor(Sensor.TYPE_LIGHT);
+        
         medianFilter = new MedianFilter(getDynamicWindow(sett.envFilterLevel));
         quickReactDebounceMs = sett.getDebounceMs();
     }
@@ -202,8 +203,7 @@ public class LightControl implements SensorEventListener {
         }
         tempBrightness = brightnessPercent;
         int finalSystemValue = Math.max(1, Math.min(255, Math.round((brightnessPercent / 100.0f) * 255)));
-        try { Settings.System.putInt(cResolver, Settings.System.SCREEN_BRIGHTNESS, finalSystemValue);
-		} catch (Exception ignored) { }
+        try { Settings.System.putInt(cResolver, Settings.System.SCREEN_BRIGHTNESS, finalSystemValue); } catch (Exception ignored) { }
     }
 
     public void reconfigure() {
@@ -217,10 +217,17 @@ public class LightControl implements SensorEventListener {
     public void setLandscape(boolean land) { this.landscape = land; }
 
     public void onScreenUnlock() {
-        try { Settings.System.putInt(cResolver, Settings.System.SCREEN_BRIGHTNESS_MODE, Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL);
-		} catch (Exception ignored) { }
+        try { Settings.System.putInt(cResolver, Settings.System.SCREEN_BRIGHTNESS_MODE, Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL); } catch (Exception ignored) { }
         needsImmediateUpdate = true;
         startListening();
+    }
+
+    public int getLastSensorValue() {
+        return (int) lux;
+    }
+
+    public int getSetBrightness() {
+        return tempBrightness;
     }
 
     private static class SensorReading {
