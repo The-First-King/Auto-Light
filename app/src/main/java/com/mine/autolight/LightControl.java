@@ -52,8 +52,6 @@ public class LightControl implements SensorEventListener {
         cResolver = context.getContentResolver();
         sMgr = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
         lightSensor = sMgr.getDefaultSensor(Sensor.TYPE_LIGHT);
-        
-        // Use the new mapping logic
         medianFilter = new MedianFilter(getDynamicWindow(sett.envFilterLevel));
         quickReactDebounceMs = sett.getDebounceMs();
     }
@@ -74,8 +72,19 @@ public class LightControl implements SensorEventListener {
     public void onSensorChanged(SensorEvent event) {
         if (event.sensor.getType() != Sensor.TYPE_LIGHT) return;
 
+        float rawLux = event.values[0];
         long now = SystemClock.elapsedRealtime();
-        float filteredLux = medianFilter.filter(event.values[0], now);
+
+        // If light goes dark (raw lux < 2.0), reset filters to allow instant dimming.
+        float filteredLux;
+        if (rawLux < 2.0f) {
+            medianFilter.clear();
+            buffer.clear();
+            rollingSum = 0f;
+            filteredLux = rawLux;
+        } else {
+            filteredLux = medianFilter.filter(rawLux, now);
+        }
 
         if (lastAppliedLux != -1f && !needsImmediateUpdate) {
             float gap = Math.abs(filteredLux - lastAppliedLux);
@@ -114,13 +123,8 @@ public class LightControl implements SensorEventListener {
         if (needsImmediateUpdate || sett.mode == Constants.WORK_MODE_UNLOCK) {
             lux = filteredLux;
             setBrightness((int) lux);
-
-            if (sett.mode == Constants.WORK_MODE_UNLOCK) {
-                needsImmediateUpdate = false;
-                stopListening();
-            } else {
-                needsImmediateUpdate = false;
-            }
+            needsImmediateUpdate = false;
+            if (sett.mode == Constants.WORK_MODE_UNLOCK) stopListening();
             return;
         }
 
@@ -129,19 +133,10 @@ public class LightControl implements SensorEventListener {
 
     private void processSmoothedLux() {
         if (buffer.isEmpty()) return;
-
-		// First apply: use last sample immediately
-        if (lastAppliedLux == -1f) {
-            lux = buffer.peekLast().value;
-            applyAndRecord(lux);
-            return;
-        }
-
         float averageLux = rollingSum / buffer.size();
         float diff = Math.abs(averageLux - lastAppliedLux);
 
-		// Update if diff > (hysteresis% of lastAppliedLux) OR diff > absoluteThreshold
-        if (diff > (lastAppliedLux * sett.hysteresisThreshold) || diff > sett.absoluteThreshold) {
+        if (lastAppliedLux == -1f || diff > (lastAppliedLux * sett.hysteresisThreshold) || diff > sett.absoluteThreshold) {
             lux = averageLux;
             applyAndRecord(lux);
         }
@@ -155,52 +150,27 @@ public class LightControl implements SensorEventListener {
     public void prepareForScreenOn() {
         needsImmediateUpdate = true;
         lastAppliedLux = -1f;
-
         buffer.clear();
         rollingSum = 0f;
-        
         medianFilter.clear();
         isQuickReactPending = false;
     }
 
     private void scheduleSuspend() {
         if (sett.mode == Constants.WORK_MODE_ALWAYS) return;
-        if (sett.mode == Constants.WORK_MODE_PORTRAIT && !landscape) return;
-        if (sett.mode == Constants.WORK_MODE_LANDSCAPE && landscape) return;
-
         delayer.removeCallbacksAndMessages(null);
         delayer.postDelayed(this::stopListening, pause);
     }
 
     public void startListening() {
-        boolean shouldActivate = false;
-
-        if (sett.mode == Constants.WORK_MODE_ALWAYS) {
-            shouldActivate = true;
-        } else if (sett.mode == Constants.WORK_MODE_LANDSCAPE) {
-            shouldActivate = landscape || needsImmediateUpdate;
-        } else if (sett.mode == Constants.WORK_MODE_PORTRAIT) {
-            shouldActivate = !landscape || needsImmediateUpdate;
-        } else if (sett.mode == Constants.WORK_MODE_UNLOCK) {
-            shouldActivate = true;
-        }
+        boolean shouldActivate = (sett.mode == Constants.WORK_MODE_ALWAYS || sett.mode == Constants.WORK_MODE_UNLOCK || (sett.mode == Constants.WORK_MODE_LANDSCAPE && landscape) || (sett.mode == Constants.WORK_MODE_PORTRAIT && !landscape) || needsImmediateUpdate);
 
         if (shouldActivate) {
             delayer.removeCallbacksAndMessages(null);
-
             if (!onListen && lightSensor != null) {
-                if (sett.mode == Constants.WORK_MODE_UNLOCK || needsImmediateUpdate) {
-                    lastAppliedLux = -1f;
-                    buffer.clear();
-                    rollingSum = 0f;
-                    
-                    medianFilter.clear();
-                    isQuickReactPending = false;
-                }
                 sMgr.registerListener(this, lightSensor, SensorManager.SENSOR_DELAY_NORMAL);
                 onListen = true;
             }
-
             scheduleSuspend();
         } else {
             stopListening();
@@ -212,122 +182,65 @@ public class LightControl implements SensorEventListener {
             sMgr.unregisterListener(this);
             onListen = false;
         }
-        delayer.removeCallbacksAndMessages(null);
     }
 
     private void setBrightness(int luxValue) {
         int brightnessPercent;
-
         if (luxValue <= sett.l1) brightnessPercent = sett.b1;
         else if (luxValue >= sett.l4) brightnessPercent = sett.b4;
         else {
             float x1, y1, x2, y2;
-
             if (luxValue <= sett.l2) { x1 = sett.l1; x2 = sett.l2; y1 = sett.b1; y2 = sett.b2; }
             else if (luxValue <= sett.l3) { x1 = sett.l2; x2 = sett.l3; y1 = sett.b2; y2 = sett.b3; }
             else { x1 = sett.l3; x2 = sett.l4; y1 = sett.b3; y2 = sett.b4; }
-
             double lx = Math.log10((double) luxValue + 1.0);
             double lx1 = Math.log10((double) x1 + 1.0);
             double lx2 = Math.log10((double) x2 + 1.0);
-
             double t = (lx2 - lx1 == 0) ? 0 : (lx - lx1) / (lx2 - lx1);
             t = Math.max(0.0, Math.min(1.0, t));
-
             brightnessPercent = (int) Math.round(y1 + (y2 - y1) * t);
         }
-
         tempBrightness = brightnessPercent;
-
-        int systemMax = 255;
-        int finalSystemValue;
-
-        if (brightnessPercent <= 1) {
-            finalSystemValue = 1;
-        } else {
-            finalSystemValue = Math.round((brightnessPercent / 100.0f) * systemMax);
-        }
-
-        finalSystemValue = Math.max(1, Math.min(systemMax, finalSystemValue));
-
-        try {
-            Settings.System.putInt(cResolver, Settings.System.SCREEN_BRIGHTNESS, finalSystemValue);
-        } catch (Exception ignored) { }
+        int finalSystemValue = Math.max(1, Math.min(255, Math.round((brightnessPercent / 100.0f) * 255)));
+        try { Settings.System.putInt(cResolver, Settings.System.SCREEN_BRIGHTNESS, finalSystemValue);
+		} catch (Exception ignored) { }
     }
 
     public void reconfigure() {
         stopListening();
         sett.load();
-        
-        // Update algorithm constraints dynamically using the new mapping
         medianFilter = new MedianFilter(getDynamicWindow(sett.envFilterLevel));
         quickReactDebounceMs = sett.getDebounceMs();
-        
         startListening();
     }
 
-    public void setLandscape(boolean land) {
-        this.landscape = land;
-    }
+    public void setLandscape(boolean land) { this.landscape = land; }
 
     public void onScreenUnlock() {
-        try {
-            Settings.System.putInt(
-                    cResolver,
-                    Settings.System.SCREEN_BRIGHTNESS_MODE,
-                    Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL
-            );
-        } catch (Exception ignored) { }
-
+        try { Settings.System.putInt(cResolver, Settings.System.SCREEN_BRIGHTNESS_MODE, Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL);
+		} catch (Exception ignored) { }
         needsImmediateUpdate = true;
         startListening();
     }
 
-    public int getLastSensorValue() { return (int) lux; }
-
-    public int getSetBrightness() { return tempBrightness; }
-
     private static class SensorReading {
-        final long time;
-        final float value;
-
-        SensorReading(long time, float value) {
-            this.time = time;
-            this.value = value;
-        }
+        final long time; final float value;
+        SensorReading(long time, float value) { this.time = time; this.value = value; }
     }
 
     private static class MedianFilter {
         private final long windowDurationMs;
         private final LinkedList<SensorReading> window = new LinkedList<>();
-
-        MedianFilter(long windowDurationMs) {
-            this.windowDurationMs = windowDurationMs;
-        }
-
+        MedianFilter(long windowDurationMs) { this.windowDurationMs = windowDurationMs; }
         float filter(float newValue, long currentTime) {
             window.addLast(new SensorReading(currentTime, newValue));
-
-            while (!window.isEmpty() && (currentTime - window.peekFirst().time) > windowDurationMs) {
-                window.removeFirst();
-            }
-
+            while (!window.isEmpty() && (currentTime - window.peekFirst().time) > windowDurationMs) window.removeFirst();
             List<Float> sortedValues = new ArrayList<>(window.size());
-            for (SensorReading reading : window) {
-                sortedValues.add(reading.value);
-            }
+            for (SensorReading reading : window) sortedValues.add(reading.value);
             Collections.sort(sortedValues);
-
             int middle = sortedValues.size() / 2;
-            if (sortedValues.size() % 2 == 1) {
-                return sortedValues.get(middle);
-            } else {
-                return (sortedValues.get(middle - 1) + sortedValues.get(middle)) / 2.0f;
-            }
+            return (sortedValues.size() % 2 == 1) ? sortedValues.get(middle) : (sortedValues.get(middle - 1) + sortedValues.get(middle)) / 2.0f;
         }
-        
-        void clear() {
-            window.clear();
-        }
+        void clear() { window.clear(); }
     }
 }
