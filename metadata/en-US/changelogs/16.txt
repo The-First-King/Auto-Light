@@ -1,0 +1,4 @@
+- Introduced advanced Environment Filtering (Low/Med/High) to improve sensor stability and eliminate unwanted light spikes.
+- Refined the adaptive brightness algorithm to ensure faster, more responsive transitions — especially when dimming in dark environments.
+
+These changes provide smoother, more reliable screen brightness control across all usage scenarios.
