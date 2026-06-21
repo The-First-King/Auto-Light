@@ -1,0 +1,1 @@
+- Resolved a regression where screen brightness scaling was incorrectly limited on some devices.
