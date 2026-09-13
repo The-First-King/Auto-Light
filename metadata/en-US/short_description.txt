@@ -1,1 +1,1 @@
-Auto Light is a lightweight utility replacing Android's auto-brightness.
+Auto Light is a lightweight utility replacing Android's auto-brightness
