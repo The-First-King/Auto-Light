@@ -3,19 +3,24 @@ package com.mine.autolight;
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.PowerManager;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.*;
 
 public class MainActivity extends Activity {
+
+    private static final String TAG = "AutoLight";
 
     private Button btnStart;
     private TextView tvState;
@@ -33,6 +38,7 @@ public class MainActivity extends Activity {
     private MySettings sett;
     private boolean isExpanded = false;
     private boolean isDialogShown = false;
+    private boolean batteryRequestShown = false;
     private static final int SENSOR_MIN = 0;
     private static final int SENSOR_MAX = 200000;
     private static final int BRIGHTNESS_MIN = 1;
@@ -67,15 +73,9 @@ public class MainActivity extends Activity {
         btnStart = findViewById(R.id.btn_start_stop);
 
         btnStart.setOnClickListener(v -> {
-            if (isServiceRunning()) {
-                setServiceEnabledPref(false);
-                killService();
-                displayServiceStatus(0);
-            } else {
-                setServiceEnabledPref(true);
-                runService();
-                displayServiceStatus(-1);
-            }
+            boolean turnOn = !isServiceRunning();
+            ServiceController.setServiceOn(this, turnOn);
+            displayServiceStatus(turnOn ? -1 : 0);
         });
 
         Button btnState = findViewById(R.id.btn_get_state);
@@ -333,16 +333,16 @@ public class MainActivity extends Activity {
         super.onResume();
 
         if (checkAndRequestPermissions()) {
+            // Asked once per launch, after the settings permission is in place
+            if (!batteryRequestShown) {
+                batteryRequestShown = true;
+                ensureBatteryExemption();
+            }
             if (!isServiceRunning() && getServiceEnabledPref()) {
                 runService();
             }
             displayServiceStatus(isServiceRunning() ? 1 : 0);
         }
-    }
-
-    private void setServiceEnabledPref(boolean enabled) {
-        SharedPreferences prefs = getSharedPreferences(Constants.PREFS_NAME, MODE_PRIVATE);
-        prefs.edit().putBoolean(Constants.PREF_ENABLED_KEY, enabled).apply();
     }
 
     private boolean getServiceEnabledPref() {
@@ -354,10 +354,6 @@ public class MainActivity extends Activity {
         Intent serviceIntent = new Intent(this, LightService.class);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) startForegroundService(serviceIntent);
         else startService(serviceIntent);
-    }
-
-    private void killService() {
-        stopService(new Intent(this, LightService.class));
     }
 
     private boolean isServiceRunning() {
@@ -397,6 +393,26 @@ public class MainActivity extends Activity {
 
             isDialogShown = true;
             return false;
+        }
+    }
+
+    // Asks the system to exclude the app from battery optimization (Unrestricted)
+    private void ensureBatteryExemption() {
+        PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        if (pm == null || pm.isIgnoringBatteryOptimizations(getPackageName())) {
+            return;
+        }
+        try {
+            // System dialog: "Allow Auto Light to always run in background?"
+            Intent intent = new Intent(
+                    Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
+                    Uri.parse("package:" + getPackageName()));
+            startActivity(intent);
+        } catch (Exception e) {
+            Log.e(TAG, "Battery exemption request failed, opening list instead", e);
+            try {
+                startActivity(new Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS));
+            } catch (Exception ignored) { }
         }
     }
 
