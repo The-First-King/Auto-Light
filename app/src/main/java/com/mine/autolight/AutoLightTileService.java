@@ -22,6 +22,7 @@ public class AutoLightTileService extends TileService {
             PendingIntent pending = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE);
             startActivityAndCollapse(pending);
         } else {
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivityAndCollapse(intent);
         }
     }
