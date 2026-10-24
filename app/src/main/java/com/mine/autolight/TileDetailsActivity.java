@@ -2,6 +2,7 @@ package com.mine.autolight;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.view.WindowManager;
 import android.widget.Switch;
 
 // Panel opened from the Auto Light tile: service on/off and QR or barcode reader mode.
@@ -15,6 +16,11 @@ public class TileDetailsActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tile_details);
         setTitle(R.string.app_name);
+
+        // Panel width: 90% of the screen (height wraps the content)
+        getWindow().setLayout(
+                (int) (getResources().getDisplayMetrics().widthPixels * 0.9f),
+                WindowManager.LayoutParams.WRAP_CONTENT);
 
         swService = findViewById(R.id.switch_service);
         swQrMode = findViewById(R.id.switch_qr_mode);
