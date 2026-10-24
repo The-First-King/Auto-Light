@@ -6,4 +6,5 @@
     <color name="green">#FF00AA00</color>
     <color name="light_green">#FF88DD88</color>
     <color name="red">#FFDD0000</color>
+    <color name="tile_panel_background">#FF303033</color>
 </resources>
