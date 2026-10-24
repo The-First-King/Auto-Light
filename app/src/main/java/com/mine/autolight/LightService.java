@@ -96,6 +96,8 @@ public class LightService extends Service {
             registerReceiver(systemReceiver, sys);
             registerReceiver(commandReceiver, cmd);
         }
+
+        ServiceController.requestTileRefresh(this);
     }
 
     @Override
@@ -152,6 +154,8 @@ public class LightService extends Service {
 
         try { unregisterReceiver(systemReceiver); } catch (Exception ignored) { }
         try { unregisterReceiver(commandReceiver); } catch (Exception ignored) { }
+
+        ServiceController.requestTileRefresh(this);
 
         super.onDestroy();
     }
