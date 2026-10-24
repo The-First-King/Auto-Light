@@ -20,6 +20,10 @@ public final class Constants {
     public static final String PREFS_NAME = "AutoLightPrefs";
     public static final String PREF_ENABLED_KEY = "service_enabled_by_user";
 
+    // QR barcode mode pauses the service until this time
+    public static final String PREF_QR_MODE_UNTIL_KEY = "qr_mode_until";
+    public static final long QR_MODE_DURATION_MS = 120_000L;
+
     // Settings storage file for curve/mode
     public static final String SETTINGS_PREFS_NAME = "mine.autolight";
 }
