@@ -21,6 +21,12 @@ public class AutoStart extends BroadcastReceiver {
             return;
         }
 
+        // QR-mode timer does not survive a reboot - end the pause now
+        if (ServiceController.isQrModeActive(context)) {
+            ServiceController.endQrMode(context);
+            return;
+        }
+
         SharedPreferences prefs = context.getSharedPreferences(Constants.PREFS_NAME, Context.MODE_PRIVATE);
         boolean isEnabled = prefs.getBoolean(Constants.PREF_ENABLED_KEY, true);
 
