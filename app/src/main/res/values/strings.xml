@@ -28,4 +28,8 @@
     <string name="quick_react_lux">Quick React (Lux): bypass smoothing if brightness changes by this value.</string>
     <string name="quick_react_percent">Quick React (%): bypass smoothing if brightness changes by this percentage.</string>
 	<string name="env_filtering">Environment Filtering: adjusts spike rejection (Low/Med/High).</string>
+    <string name="service_status">Service status</string>
+    <string name="qr_barcode_mode">QR or barcode reader mode</string>
+    <string name="qr_barcode_hint">Temporarily pauses service for 2 minutes.</string>
+    <string name="qr_mode_active">QR mode: paused</string>
 </resources>
