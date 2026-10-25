@@ -37,6 +37,8 @@ public class TileDetailsActivity extends Activity {
             else ServiceController.endQrMode(this);
             refresh();
         });
+
+        findViewById(R.id.btn_done).setOnClickListener(v -> finish());
     }
 
     @Override
