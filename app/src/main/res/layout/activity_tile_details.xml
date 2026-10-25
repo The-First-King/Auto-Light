@@ -42,9 +42,10 @@
 
         <Button
             android:id="@+id/btn_done"
-            style="?android:attr/borderlessButtonStyle"
+            style="?android:attr/buttonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textAllCaps="false"
             android:text="@string/done" />
 
     </LinearLayout>
