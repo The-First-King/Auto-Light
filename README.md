@@ -24,6 +24,7 @@ To provide reliable system control without compromising privacy, Auto Light uses
 * Notifications (Service Persistence): Used to maintain a Foreground Service, ensuring the Android system does not terminate the app while it's monitoring light levels.
 * Run at Startup: Ensures your custom brightness profile is active immediately after a device reboot.
 * User Present & Configuration Change: Used strictly to trigger brightness adjustments when you unlock your phone or rotate the screen (No privacy-sensitive data is accessed).
+* Ignore Battery Optimizations: On first launch, the app asks to set it to "Unrestricted" so the background service keeps running while the device is idle.
 
 **Note:** This app does NOT require Internet access, Location data, or Phone/Call logs, making it a privacy-respecting utility.
 
