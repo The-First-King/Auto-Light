@@ -6,4 +6,11 @@
     </style>
 
     <style name="Theme.AutoLight" parent="Base.Theme.AutoLight" />
+
+    <!-- Quick Settings panel: floats over the current screen with no window background -->
+    <style name="Theme.AutoLight.TilePanel" parent="@android:style/Theme.Material.Dialog.NoActionBar">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:backgroundDimEnabled">false</item>
+    </style>
 </resources>
