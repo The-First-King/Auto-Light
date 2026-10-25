@@ -32,4 +32,5 @@
     <string name="qr_barcode_mode">QR or barcode reader mode</string>
     <string name="qr_barcode_hint">Temporarily pauses service for 2 minutes.</string>
     <string name="qr_mode_active">QR mode: paused</string>
+    <string name="done">Done</string>
 </resources>
