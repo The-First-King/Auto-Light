@@ -1,1 +1,4 @@
-1
+- The app icon and its display on the Android launcher have been improved.
+- Adding an option to ignore battery optimizations. Previously, it was necessary to do this manually. Now, on first launch, the app asks to set it to "Unrestricted" so the background service keeps running while the device is idle.
+- Adding a Quick Settings tile that opens an "Auto Light" panel. Tapping the tile allows to turn the service on or off and enable QR or barcode reader mode.
+- QR or Barcode Reader Mode pauses brightness adjustments for 120 seconds, allowing to change the screen brightness manually without it being overwritten by the service, and then automatically turns the service back on.
