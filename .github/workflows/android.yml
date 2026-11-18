@@ -17,6 +17,8 @@ jobs:
       # Validate Fastlane Supply Metadata
       - name: Validate Fastlane Metadata
         uses: ashutoshgngwr/validate-fastlane-supply-metadata@v2
+        with:
+          fastlaneDir: ./metadata
 
       # Set up JDK 
       - name: Set up JDK 17 
